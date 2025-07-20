@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing page</title>
+</head>
+<body>
+<% if (user) { %>
+<h1>Welcome back, <%= user.username %>!</h1>
+<a href="/auth/sign-out">Sign out</a>
+<% } else { %>
+<h1>Log in today to create custom playlists!</h1>
+<p>
+  <a href="/auth/sign-up">Sign up</a> or <a href="/auth/sign-in">sign in</a>.
+</p>
+<% } %>
+</body>
+</html>
