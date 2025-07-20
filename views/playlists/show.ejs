@@ -1,0 +1,81 @@
+<%- include('../partials/header') %>
+
+<main class="playlist-show">
+  <div class="playlist-header">
+    <% if (playlist.coverImage) { %>
+      <img src="<%= playlist.coverImage %>" alt="Cover image for <%= playlist.title %>" class="cover-image">
+    <% } else { %>
+      <div class="cover-image placeholder">
+        <span class="initial"><%= playlist.title.charAt(0) %></span>
+      </div>
+    <% } %>
+
+    <div class="playlist-info">
+      <h1 class="playlist-title"><%= playlist.title %></h1>
+      <p class="playlist-description"><%= playlist.description %></p>
+      <div class="playlist-meta">
+        <span class="song-count"><%= playlist.songs.length %> songs</span>
+        <span class="divider">•</span>
+        <span class="created-date">
+          Created <%= new Date(playlist.createdAt).toLocaleDateString() %>
+        </span>
+      </div>
+      <div class="playlist-actions">
+        <a href="/playlists/<%= playlist._id %>/edit" class="btn btn-edit">
+          <i class="fas fa-edit"></i> Edit
+        </a>
+        <form action="/playlists/<%= playlist._id %>?_method=DELETE" method="POST" class="delete-form">
+          <button type="submit" class="btn btn-delete">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="song-management">
+    <h2 class="section-title">Songs</h2>
+    <a href="/playlists/<%= playlist._id %>/new" class="btn btn-add-song">
+      <i class="fas fa-plus"></i> Add Song
+    </a>
+  </div>
+
+  <% if (playlist.songs.length > 0) { %>
+    <ul class="song-list">
+      <% playlist.songs.forEach((song, index) => { %>
+        <li class="song-item">
+          <div class="song-number"><%= index + 1 %></div>
+          <div class="song-info">
+            <div class="song-title"><%= song.title %></div>
+            <div class="song-artist"><%= song.artist %></div>
+            <% if (song.duration) { %>
+              <div class="song-duration"><%= song.duration %></div>
+            <% } %>
+          </div>
+          <div class="song-actions">
+            <% if (song.spotifyLink) { %>
+              <a href="<%= song.spotifyLink %>" target="_blank" class="btn btn-spotify">
+                <i class="fab fa-spotify"></i>
+              </a>
+            <% } %>
+            <form action="/playlists/<%= playlist._id %>/songs/<%= song._id %>?_method=DELETE" method="POST">
+              <button type="submit" class="btn btn-remove">
+                <i class="fas fa-times"></i>
+              </button>
+            </form>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+  <% } else { %>
+    <div class="empty-state">
+      <i class="fas fa-music"></i>
+      <p>No songs in this playlist yet</p>
+      <a href="/playlists/<%= playlist._id %>/new" class="btn btn-primary">
+        Add Your First Song
+      </a>
+    </div>
+  <% } %>
+</main>
+
+<%- include('../partials/footer') %>

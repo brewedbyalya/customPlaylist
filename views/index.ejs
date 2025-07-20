@@ -1,19 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Landing page</title>
-</head>
-<body>
-<% if (user) { %>
-<h1>Welcome back, <%= user.username %>!</h1>
-<a href="/auth/sign-out">Sign out</a>
-<% } else { %>
-<h1>Log in today to create custom playlists!</h1>
-<p>
-  <a href="/auth/sign-up">Sign up</a> or <a href="/auth/sign-in">sign in</a>.
-</p>
+<% if (typeof playlists === 'undefined') { %>
+    <% playlists = []; %>
 <% } %>
-</body>
-</html>
+
+<%- include('partials/header') %>
+
+<div class="hero">
+  <div class="hero-content">
+    <h1 class="hero-title">Organize Your Music</h1>
+    <p class="hero-subtitle">Create, manage, and share your perfect playlists</p>
+    <div class="hero-actions">
+      <% if (!user) { %>
+        <a href="/auth/sign-up" class="btn btn-primary">Get Started</a>
+        <a href="/auth/sign-in" class="btn btn-secondary">Sign In</a>
+      <% } else { %>
+        <a href="/playlists" class="btn btn-primary">My Playlists</a>
+        <a href="/playlists/new" class="btn btn-secondary">Create New</a>
+      <% } %>
+    </div>
+  </div>
+  <div class="hero-image">
+    <img src="/images/music-hero.svg" alt="Person listening to music">
+  </div>
+</div>
+
+<div class="features">
+  <div class="feature-card">
+    <div class="feature-icon">
+      <i class="fas fa-music"></i>
+    </div>
+    <h3>Create Playlists</h3>
+    <p>Build custom playlists with your favorite songs and artists.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">
+      <i class="fas fa-share-alt"></i>
+    </div>
+    <h3>Share With Friends</h3>
+    <p>Make your playlists public and share them with the world.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">
+      <i class="fas fa-headphones"></i>
+    </div>
+    <h3>Listen Anywhere</h3>
+    <p>Access your music collection from any device.</p>
+  </div>
+</div>
+
+<% if (playlists && playlists.length > 0) { %>
+  <div class="public-playlists">
+    <h2>Featured Playlists</h2>
+    <div class="playlist-grid">
+      <% playlists.forEach(playlist => { %>
+        <a href="/playlists/<%= playlist._id %>" class="playlist-card">
+          <% if (playlist.coverImage) { %>
+            <img src="<%= playlist.coverImage %>" alt="<%= playlist.title %> cover" class="playlist-cover">
+          <% } else { %>
+            <div class="playlist-cover placeholder">
+              <span><%= playlist.title.charAt(0) %></span>
+            </div>
+          <% } %>
+          <div class="playlist-info">
+            <h3><%= playlist.title %></h3>
+            <p>By <%= playlist.createdBy.username %></p>
+            <p><%= playlist.songs.length %> songs</p>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

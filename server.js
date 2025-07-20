@@ -3,12 +3,16 @@ const express = require('express');
 const app = express();
 const methodOverride = require('method-override');
 const morgan = require('morgan');
+const path = require('path');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const authController = require('./controllers/authController');
 const isSignedIn = require('./middleware/is-signed-in');
 const passUserToView = require('./middleware/pass-user-to-view');
+const Playlist = require('./models/playlist');
+const playlistController = require('./controllers/playlistController');
+
 
 // Database
 mongoose.connect(process.env.MONGODB_URI);
@@ -30,14 +34,34 @@ app.use(session({
 }));
 app.use(passUserToView);
 
-app.get('/', (req, res) => {
-    res.render('index.ejs');
-})
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views')); 
 
 // Routes
+app.get('/', async (req, res) => {
+  try {
+    const playlists = await Playlist.find({ isPublic: true })
+      .populate('createdBy')
+      .populate('songs')
+      .limit(6);
+    
+    res.render('index', { 
+      playlists,
+      user: req.session.user
+    });
+  } catch (error) {
+    console.error(error);
+    res.render('index', { 
+      playlists: [],
+      user: req.session.user 
+    });
+  }
+});
+
 app.use('/auth', authController);
+app.use('/playlists', playlistController);
 
-
+// Server
 const port = process.env.PORT ? process.env.PORT : "3000"
 app.listen(port, () => {
     console.log(`The express app is ready on port ${port}`);

@@ -1,0 +1,74 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h2 class="mb-0"><%= song.title %></h2>
+      <% if (user && user._id.equals(song.addedBy._id)) { %>
+        <div class="btn-group">
+          <a href="/songs/<%= song._id %>/edit" class="btn btn-sm btn-outline-secondary">
+            Edit
+          </a>
+          <form action="/songs/<%= song._id %>?_method=DELETE" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-sm btn-outline-danger">
+              Delete
+            </button>
+          </form>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <dl class="row">
+            <dt class="col-sm-3">Artist:</dt>
+            <dd class="col-sm-9"><%= song.artist %></dd>
+
+            <% if (song.duration) { %>
+              <dt class="col-sm-3">Duration:</dt>
+              <dd class="col-sm-9"><%= song.duration %></dd>
+            <% } %>
+
+            <% if (song.genre) { %>
+              <dt class="col-sm-3">Genre:</dt>
+              <dd class="col-sm-9"><%= song.genre %></dd>
+            <% } %>
+
+            <dt class="col-sm-3">Added by:</dt>
+            <dd class="col-sm-9"><%= song.addedBy.username %></dd>
+          </dl>
+
+          <% if (song.spotifyLink) { %>
+            <a href="<%= song.spotifyLink %>" target="_blank" class="btn btn-sm btn-success">
+              <i class="fab fa-spotify"></i> Listen on Spotify
+            </a>
+          <% } %>
+        </div>
+
+        <% if (song.playlists && song.playlists.length > 0) { %>
+          <div class="col-md-6">
+            <h5>Included in Playlists:</h5>
+            <ul class="list-group">
+              <% song.playlists.forEach(playlist => { %>
+                <a href="/playlists/<%= playlist._id %>" class="list-group-item list-group-item-action">
+                  <%= playlist.title %>
+                </a>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="card-footer text-muted">
+      Added <%= song.createdAt.toLocaleDateString() %>
+    </div>
+  </div>
+
+  <div class="mt-3">
+    <a href="/songs" class="btn btn-outline-primary">Back to All Songs</a>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

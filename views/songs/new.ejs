@@ -1,0 +1,56 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <div class="card border-0">
+    <div class="card-body p-4">
+      <h2 class="mb-4">Add New Song</h2>
+
+      <form action="/songs" method="POST">
+        
+        <div class="mb-3">
+          <label for="title" class="form-label">Title *</label>
+          <input type="text" class="form-control" id="title" name="title" value="<%= song ? song.title : '' %>" required>
+          <% if (errors && errors.title) { %>
+            <div class="invalid-feedback">
+              <%= errors.title.message %>
+            </div>
+          <% } %>
+        </div>
+
+        <div class="mb-3">
+          <label for="artist" class="form-label">Artist *</label>
+          <input type="text" class="form-control" id="artist" name="artist" value="<%= song ? song.artist : '' %>" required>
+          <% if (errors && errors.artist) { %>
+            <div class="invalid-feedback">
+              <%= errors.artist.message %>
+            </div>
+          <% } %>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="duration" class="form-label">Duration</label>
+            <input type="text" class="form-control" id="duration" name="duration" value="<%= song ? song.duration : '' %>">
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="genre" class="form-label">Genre</label>
+            <input type="text" class="form-control" id="genre" name="genre" value="<%= song ? song.genre : '' %>">
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label for="spotifyLink" class="form-label">Spotify Link</label>
+          <input type="url" class="form-control" id="spotifyLink" name="spotifyLink" value="<%= song ? song.spotifyLink : '' %>">
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <a href="/songs" class="btn btn-outline-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary">Save Song</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

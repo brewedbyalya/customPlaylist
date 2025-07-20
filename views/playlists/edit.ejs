@@ -1,0 +1,57 @@
+<%- include('../partials/header') %>
+
+<main class="playlist-edit">
+  <div class="edit-header">
+    <h1>Edit Playlist</h1>
+    <a href="/playlists/<%= playlist._id %>" class="btn btn-back">
+      <i class="fas fa-arrow-left"></i> Back to Playlist
+    </a>
+  </div>
+
+  <form action="/playlists/<%= playlist._id %>?_method=PUT" method="POST" class="edit-form">
+    <div class="form-group">
+      <label for="title" class="form-label">Playlist Title</label>
+      <input type="text" id="title" name="title" class="form-input" value="<%= playlist.title %>" required>
+    </div>
+
+    <div class="form-group">
+      <label for="description" class="form-label">Description</label>
+      <textarea id="description" name="description" class="form-textarea" rows="3">
+        <%= playlist.description %>
+    </textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="coverImage" class="form-label">Cover Image URL</label>
+      <input type="url" id="coverImage" name="coverImage" class="form-input" value="<%= playlist.coverImage || '' %>" placeholder="">
+      <% if (playlist.coverImage) { %>
+        <div class="current-image-preview">
+          <p>Current Image:</p>
+          <img src="<%= playlist.coverImage %>" alt="Current cover image" class="preview-image">
+        </div>
+      <% } %>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Visibility</label>
+      <div class="radio-group">
+        <label class="radio-option">
+          <input type="radio" name="isPublic" value="false" <%= !playlist.isPublic ? 'checked' : '' %>>
+          <span class="radio-label">Private</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="isPublic" value="true" <%= playlist.isPublic ? 'checked' : '' %>>
+          <span class="radio-label">Public</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-save">
+        <i class="fas fa-save"></i> Save Changes
+      </button>
+    </div>
+  </form>
+</main>
+
+<%- include('../partials/footer') %>
