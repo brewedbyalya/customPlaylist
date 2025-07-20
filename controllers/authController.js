@@ -3,10 +3,6 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const User = require('../models/user.js');
 
-router.get('/', (req, res) => {
-    res.send('does the auth route work?');
-});
-
 // Signup - Get
 router.get('/sign-up', (req, res) => {
     res.render('auth/sign-up.ejs');
