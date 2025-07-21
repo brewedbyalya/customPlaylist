@@ -25,13 +25,16 @@ router.get('/', async (req, res) => {
   res.render('playlists/index', { 
     playlists,
     currentPage: page,
-    totalPages: Math.ceil(count / limit)
+    totalPages: Math.ceil(count / limit),
+    user: req.session.user // Added user to view
   });
 });
 
 // new - get
 router.get('/new', isSignedIn, (req, res) => {
-  res.render('playlists/new');
+  res.render('playlists/new', { 
+    user: req.session.user // Added user to view
+  });
 });
 
 // new - post
@@ -39,21 +42,26 @@ router.post('/', isSignedIn, upload.single('coverImage'), async (req, res) => {
   try {
     req.body.createdBy = req.session.user._id;
     req.body.image = {
-            url: req.file.path,
-            cloudinary_id: req.file.fieldname
-        }
+      url: req.file.path,
+      cloudinary_id: req.file.fieldname
+    }
     const newPlaylist = await Playlist.create(req.body);
     res.redirect(`/playlists/${newPlaylist._id}`);
   } catch (error) {
     console.error(error);
-    res.render('playlists/new', { error: 'Failed to create playlist' });
+    res.render('playlists/new', { 
+      error: 'Failed to create playlist',
+      user: req.session.user // Added user to view
+    });
   }
 });
 
 // show
 router.get('/:id', async (req, res) => {
   try {
-    const playlist = await Playlist.findById(req.params.id).populate('createdBy').populate('songs');
+    const playlist = await Playlist.findById(req.params.id)
+      .populate('createdBy')
+      .populate('songs');
     
     if (!playlist) {
       return res.redirect('/playlists');
@@ -63,7 +71,10 @@ router.get('/:id', async (req, res) => {
       return res.redirect('/playlists');
     }
 
-    res.render('playlists/show', { playlist });
+    res.render('playlists/show', { 
+      playlist,
+      user: req.session.user // Added user to view
+    });
   } catch (error) {
     console.error(error);
     res.redirect('/playlists');
@@ -84,7 +95,11 @@ router.get('/:id/edit', isSignedIn, async (req, res) => {
     }
 
     const songs = await Song.find({});
-    res.render('playlists/edit', { playlist, songs });
+    res.render('playlists/edit', { 
+      playlist, 
+      songs,
+      user: req.session.user // Added user to view
+    });
   } catch (error) {
     console.error(error);
     res.redirect('/playlists');
@@ -155,7 +170,6 @@ router.post('/:id/songs', isSignedIn, async (req, res) => {
       return res.redirect(`/playlists/${req.params.id}/edit`);
     }
 
-
     playlist.songs.push(req.body.songId);
     await playlist.save();
 
@@ -185,7 +199,7 @@ router.delete('/:id/songs/:songId', isSignedIn, async (req, res) => {
       return res.redirect('/playlists');
     }
 
-playlist.songs = playlist.songs.filter(
+    playlist.songs = playlist.songs.filter(
       songId => songId.toString() !== req.params.songId
     );
     await playlist.save();

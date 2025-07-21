@@ -21,24 +21,28 @@
         </span>
       </div>
 
-      <div class="playlist-actions">
-        <a href="/playlists/<%= playlist._id %>/edit" class="btn btn-edit">
-          <i class="fas fa-edit"></i> Edit
-        </a>
-        <form action="/playlists/<%= playlist._id %>?_method=DELETE" method="POST" class="delete-form">
-          <button type="submit" class="btn btn-delete">
-            <i class="fas fa-trash"></i> Delete
-          </button>
-        </form>
-      </div>
+      <% if (locals.user && playlist.createdBy._id.toString() === locals.user._id.toString()) { %>
+        <div class="playlist-actions">
+          <a href="/playlists/<%= playlist._id %>/edit" class="btn btn-edit">
+            <i class="fas fa-edit"></i> Edit
+          </a>
+          <form action="/playlists/<%= playlist._id %>?_method=DELETE" method="POST" class="delete-form">
+            <button type="submit" class="btn btn-delete">
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </form>
+        </div>
+      <% } %>
     </div>
   </div>
 
   <div class="song-management">
     <h2 class="section-title">Songs</h2>
-    <a href="/songs/new" class="btn btn-add-song">
-      <i class="fas fa-plus"></i> Add Song
-    </a>
+    <% if (locals.user && playlist.createdBy._id.toString() === locals.user._id.toString()) { %>
+      <a href="/songs/new" class="btn btn-add-song">
+        <i class="fas fa-plus"></i> Add Song
+      </a>
+    <% } %>
   </div>
 
   <% if (playlist.songs.length > 0) { %>
@@ -59,11 +63,13 @@
                 <i class="fab fa-spotify"></i>
               </a>
             <% } %>
-            <form action="/playlists/<%= playlist._id %>/songs/<%= song._id %>?_method=DELETE" method="POST">
-              <button type="submit" class="btn btn-remove">
-                <i class="fas fa-times"></i>
-              </button>
-            </form>
+            <% if (locals.user && playlist.createdBy._id.toString() === locals.user._id.toString()) { %>
+              <form action="/playlists/<%= playlist._id %>/songs/<%= song._id %>?_method=DELETE" method="POST">
+                <button type="submit" class="btn btn-remove">
+                  <i class="fas fa-times"></i>
+                </button>
+              </form>
+            <% } %>
           </div>
         </li>
       <% }) %>
@@ -72,9 +78,11 @@
     <div class="empty-state">
       <i class="fas fa-music"></i>
       <p>No songs in this playlist yet</p>
-      <a href="/songs/new" class="btn btn-primary">
-        Add Your First Song
-      </a>
+      <% if (locals.user && playlist.createdBy._id.toString() === locals.user._id.toString()) { %>
+        <a href="/songs/new" class="btn btn-primary">
+          Add Your First Song
+        </a>
+      <% } %>
     </div>
   <% } %>
 </main>
