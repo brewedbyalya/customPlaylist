@@ -2,23 +2,17 @@ const express = require('express');
 const router = express.Router();
 const Song = require('../models/song');
 const Playlist = require('../models/playlist');
-const User = require('../models/user');
 const isSignedIn = require('../middleware/is-signed-in');
 
-// index
-router.get('/', async (req, res) => {
+// new - get
+router.get('/new', isSignedIn, async (req, res) => {
   try {
-    const songs = await Song.find({}).populate('addedBy').populate('playlists');
-    res.render('songs/index', { songs });
+    const playlists = await Playlist.find({ createdBy: req.session.user._id });
+    res.render('songs/new', { playlists });
   } catch (error) {
     console.error(error);
     res.redirect('/');
   }
-});
-
-// new - get
-router.get('/new', isSignedIn, (req, res) => {
-  res.render('songs/new');
 });
 
 // new - post
@@ -26,10 +20,28 @@ router.post('/', isSignedIn, async (req, res) => {
   try {
     req.body.addedBy = req.session.user._id;
     const newSong = await Song.create(req.body);
+    
+    // song to playlist
+    if (req.body.playlists) {
+      const playlists = Array.isArray(req.body.playlists) ? req.body.playlists : [req.body.playlists];
+      
+      await Promise.all([
+        Playlist.updateMany(
+          { _id: { $in: playlists } },
+          { $addToSet: { songs: newSong._id } }
+        ),
+        
+        Song.findByIdAndUpdate(
+          newSong._id,
+          { $addToSet: { playlists: { $each: playlists } } }
+        )
+      ]);
+    }
+    
     res.redirect(`/songs/${newSong._id}`);
   } catch (error) {
     console.error(error);
-    res.render('songs/new', { error: 'Failed to add song' });
+    res.render('songs/new', { error: 'Failed to create song' });
   }
 });
 
@@ -41,20 +53,13 @@ router.get('/:id', async (req, res) => {
       .populate('playlists');
     
     if (!song) {
-      return res.redirect('/songs');
+      return res.redirect('/');
     }
-
-    let userPlaylists = [];
-    if (req.session.user) {
-      userPlaylists = await Playlist.find({ 
-        createdBy: req.session.user._id 
-      });
-    }
-
-    res.render('songs/show', { song, userPlaylists });
+    
+    res.render('songs/show', { song });
   } catch (error) {
     console.error(error);
-    res.redirect('/songs');
+    res.redirect('/');
   }
 });
 
@@ -62,131 +67,69 @@ router.get('/:id', async (req, res) => {
 router.get('/:id/edit', isSignedIn, async (req, res) => {
   try {
     const song = await Song.findById(req.params.id);
+    const playlists = await Playlist.find({ createdBy: req.session.user._id });
     
     if (!song) {
-      return res.redirect('/songs');
+      return res.redirect('/');
     }
-
+    
     if (song.addedBy.toString() !== req.session.user._id) {
-      return res.redirect('/songs');
+      return res.redirect('/');
     }
-
-    res.render('songs/edit', { song });
+    
+    res.render('songs/edit', { song, playlists });
   } catch (error) {
     console.error(error);
-    res.redirect('/songs');
+    res.redirect('/');
   }
 });
 
-// edit - post
+// edit - put
 router.put('/:id', isSignedIn, async (req, res) => {
   try {
     const song = await Song.findById(req.params.id);
     
     if (!song) {
-      return res.redirect('/songs');
+      return res.redirect('/');
     }
-
+    
     if (song.addedBy.toString() !== req.session.user._id) {
-      return res.redirect('/songs');
+      return res.redirect('/');
     }
-
+    
     await Song.findByIdAndUpdate(req.params.id, req.body);
+
     res.redirect(`/songs/${req.params.id}`);
   } catch (error) {
     console.error(error);
-    res.redirect('/songs');
+    res.redirect('/');
   }
 });
 
-// delete - remove song
+// delete
 router.delete('/:id', isSignedIn, async (req, res) => {
   try {
     const song = await Song.findById(req.params.id);
     
     if (!song) {
-      return res.redirect('/songs');
+      return res.redirect('/');
     }
-
+    
     if (song.addedBy.toString() !== req.session.user._id) {
-      return res.redirect('/songs');
+      return res.redirect('/');
     }
-
-// delete - remove from all playlists
+    
+    // delete from playlist
     await Playlist.updateMany(
       { songs: req.params.id },
       { $pull: { songs: req.params.id } }
     );
-
+    
     await Song.findByIdAndDelete(req.params.id);
-    res.redirect('/songs');
+    res.redirect('/');
   } catch (error) {
     console.error(error);
-    res.redirect('/songs');
-  }
-});
-
-// song added to playlist
-router.post('/:id/playlists', isSignedIn, async (req, res) => {
-  try {
-    const song = await Song.findById(req.params.id);
-    const playlist = await Playlist.findById(req.body.playlistId);
-    
-    if (!song || !playlist) {
-      return res.redirect('/songs');
-    }
-
-    if (playlist.createdBy.toString() !== req.session.user._id) {
-      return res.redirect('/songs');
-    }
-
-    if (playlist.songs.includes(song._id)) {
-      return res.redirect(`/songs/${song._id}`);
-    }
-
-    playlist.songs.push(song._id);
-    await playlist.save();
-
-    if (!song.playlists.includes(playlist._id)) {
-      song.playlists.push(playlist._id);
-      await song.save();
-    }
-
-    res.redirect(`/songs/${song._id}`);
-  } catch (error) {
-    console.error(error);
-    res.redirect('/songs');
-  }
-});
-
-// delete - remove song from playlits
-router.delete('/:id/playlists/:playlistId', isSignedIn, async (req, res) => {
-  try {
-    const song = await Song.findById(req.params.id);
-    const playlist = await Playlist.findById(req.params.playlistId);
-    
-    if (!song || !playlist) {
-      return res.redirect('/songs');
-    }
-
-    if (playlist.createdBy.toString() !== req.session.user._id) {
-      return res.redirect('/songs');
-    }
-
-    playlist.songs = playlist.songs.filter(
-      songId => songId.toString() !== req.params.id
-    );
-    await playlist.save();
-
-    song.playlists = song.playlists.filter(
-      playlistId => playlistId.toString() !== req.params.playlistId
-    );
-    await song.save();
-
-    res.redirect(`/songs/${req.params.id}`);
-  } catch (error) {
-    console.error(error);
-    res.redirect('/songs');
+    res.redirect('/');
   }
 });
 

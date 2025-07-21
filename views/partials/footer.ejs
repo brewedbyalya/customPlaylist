@@ -1,2 +1,28 @@
-</body>
-</html>
+<footer class="main-footer">
+    <div class="container footer-content">
+        <div class="footer-about">
+            <h3>PlaylistApp</h3>
+            <p>Create, share, and discover amazing music playlists.</p>
+        </div>
+        <div class="footer-links">
+            <ul>
+                <li><h4>Explore</h4></li>
+                <li><a href="/">Home</a></li>
+                <li><a href="/playlists">Playlists</a></li>
+            </ul>
+            <ul>
+                <li><h4>Account</h4></li>
+                <% if (user) { %>
+                    <li><a href="#">Profile</a></li>
+                    <li><a href="/auth/sign-out">Sign Out</a></li>
+                <% } else { %>
+                    <li><a href="/auth/sign-in">Sign In</a></li>
+                    <li><a href="/auth/sign-up">Sign Up</a></li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+    <div class="container copyright">
+        <p>&copy; <%= new Date().getFullYear() %> PlaylistApp. All rights reserved.</p>
+    </div>
+</footer>

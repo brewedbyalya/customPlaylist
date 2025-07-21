@@ -3,11 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playlist app</title>
     <link rel="stylesheet" href="/stylesheets/style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
-    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <title>Clever title here</title>
 </head>
 <body>
-  
+    <header class="main-header">
+        <div class="container header-container">
+            <div class="logo">
+                <a href="/">
+                    <i class="fas fa-music"></i>
+                    <span>PlaylistApp</span>
+                </a>
+            </div>
+            
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/playlists">Browse</a></li>
+                    
+                    <% if (user) { %>
+                        <li><a href="/playlists/new">Create</a></li>
+                     <li class="user-menu">
+                            <span class="username">
+                                <i class="fas fa-user-circle"></i> <%= user.username %>
+                            </span>
+                            <ul class="dropdown">
+                                <li>
+                            <li>
+                                <form action="/auth/sign-out" method="POST" class="logout-form">
+                                    <% if (user) { %>
+                                    <li>
+                                        <a href="/auth/sign-out" class="btn-logout">
+                                        <i class="fas fa-sign-out-alt"></i> Sign Out
+                                        </a>
+                                    </li>
+                                    <% } %>
+                    <% } else { %>
+                        <li><a href="/auth/sign-in" class="btn btn-secondary">Sign In</a></li>
+                        <li><a href="/auth/sign-up" class="btn btn-primary">Sign Up</a></li>
+                    <% } %>
+                </ul>
+            </nav>
+        </div>
+    </header>

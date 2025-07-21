@@ -7,15 +7,24 @@ const isSignedIn = require('../middleware/is-signed-in');
 
 // index
 router.get('/', async (req, res) => {
-  try {
-    const playlists = await Playlist.find({ isPublic: true })
+  const page = parseInt(req.query.page) || 1;
+  const limit = 10;
+  const skip = (page - 1) * limit;
+
+  const [playlists, count] = await Promise.all([
+    Playlist.find({ isPublic: true })
+      .skip(skip)
+      .limit(limit)
       .populate('createdBy')
-      .populate('songs');
-    res.render('playlists/index', { playlists });
-  } catch (error) {
-    console.error(error);
-    res.redirect('/');
-  }
+      .populate('songs'),
+    Playlist.countDocuments({ isPublic: true })
+  ]);
+
+  res.render('playlists/index', { 
+    playlists,
+    currentPage: page,
+    totalPages: Math.ceil(count / limit)
+  });
 });
 
 // new - get
@@ -38,9 +47,7 @@ router.post('/', isSignedIn, async (req, res) => {
 // show
 router.get('/:id', async (req, res) => {
   try {
-    const playlist = await Playlist.findById(req.params.id)
-      .populate('createdBy')
-      .populate('songs');
+    const playlist = await Playlist.findById(req.params.id).populate('createdBy').populate('songs');
     
     if (!playlist) {
       return res.redirect('/playlists');

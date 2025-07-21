@@ -1,20 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign Up</title>
-  </head>
-  <body>
-    <h1>Create a new account!</h1>
-    <form action="/auth/sign-up" method="POST">
-      <label for="username">Username:</label>
-      <input type="text" name="username" id="username" />
-      <label for="password">Password:</label>
-      <input type="password" name="password" id="password" />
-      <label for="confirmPassword">Confirm Password:</label>
-      <input type="password" name="confirmPassword" id="confirmPassword" />
-      <button type="submit">Sign up</button>
+<%- include('../partials/header') %>
+<div class="auth-container">
+  <div class="auth-card">
+    <h1 class="auth-title">Create Account</h1>
+
+    <form action="/auth/sign-up" method="POST" class="auth-form">
+      <div class="form-group">
+        <label for="username" class="form-label">
+          <i class="fas fa-user"></i> Username
+        </label>
+        <input type="text" name="username" id="username" class="form-input" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="password" class="form-label">
+          <i class="fas fa-lock"></i> Password
+        </label>
+        <input type="password" name="password" id="password" class="form-input" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="confirmPassword" class="form-label">
+          <i class="fas fa-check-circle"></i> Confirm Password
+        </label>
+        <input type="password" name="confirmPassword" id="confirmPassword" class="form-input" required>
+      </div>
+      
+      <button type="submit" class="auth-button">
+        <i class="fas fa-user-plus"></i> Sign Up
+      </button>
     </form>
-  </body>
-</html>
+    
+    <div class="auth-footer">
+      Already have an account? <a href="/auth/sign-in">Sign in</a>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>

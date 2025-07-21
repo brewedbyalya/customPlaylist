@@ -3,12 +3,12 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const User = require('../models/user.js');
 
-// Signup - Get
+// signup - get
 router.get('/sign-up', (req, res) => {
     res.render('auth/sign-up.ejs');
 });
 
-// Signup - Post
+// signup - post
 router.post('/sign-up', async (req, res) => {
 
     console.log(req)
@@ -33,12 +33,12 @@ router.post('/sign-up', async (req, res) => {
     })
 });
 
-// Signin - Get
+// signin - get
 router.get('/sign-in', (req, res) => {
     res.render('auth/sign-in.ejs');
 });
 
-// Signin - Post
+// signin - post
 router.post('/sign-in', async (req, res) => {
     const userInDatabase = await User.findOne({ username: req.body.username });
     console.log(userInDatabase);
@@ -58,11 +58,10 @@ router.post('/sign-in', async (req, res) => {
     })
 });
 
-// Signout
-router.get('/sign-out', (req, res) => {
-    req.session.destroy(() => {
-        res.redirect('/');
-    })
+// signout
+router.get("/sign-out", (req, res) => {
+  req.session.destroy();
+  res.redirect("/");
 });
 
 module.exports = router;

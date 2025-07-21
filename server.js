@@ -12,6 +12,7 @@ const isSignedIn = require('./middleware/is-signed-in');
 const passUserToView = require('./middleware/pass-user-to-view');
 const Playlist = require('./models/playlist');
 const playlistController = require('./controllers/playlistController');
+const songController = require('./controllers/songController');
 
 
 // Database
@@ -36,6 +37,7 @@ app.use(passUserToView);
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views')); 
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
 app.get('/', async (req, res) => {
@@ -60,6 +62,7 @@ app.get('/', async (req, res) => {
 
 app.use('/auth', authController);
 app.use('/playlists', playlistController);
+app.use('/songs', songController);
 
 // Server
 const port = process.env.PORT ? process.env.PORT : "3000"
