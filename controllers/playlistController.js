@@ -4,6 +4,8 @@ const Playlist = require('../models/playlist');
 const Song = require('../models/song');
 const User = require('../models/user');
 const isSignedIn = require('../middleware/is-signed-in');
+const upload = require('../config/multer');
+const cloudinary = require('../config/cloudinary');
 
 // index
 router.get('/', async (req, res) => {
@@ -33,9 +35,13 @@ router.get('/new', isSignedIn, (req, res) => {
 });
 
 // new - post
-router.post('/', isSignedIn, async (req, res) => {
+router.post('/', isSignedIn, upload.single('coverImage'), async (req, res) => {
   try {
     req.body.createdBy = req.session.user._id;
+    req.body.image = {
+            url: req.file.path,
+            cloudinary_id: req.file.fieldname
+        }
     const newPlaylist = await Playlist.create(req.body);
     res.redirect(`/playlists/${newPlaylist._id}`);
   } catch (error) {
