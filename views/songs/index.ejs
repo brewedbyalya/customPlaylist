@@ -1,0 +1,86 @@
+<%- include('../partials/header') %>
+
+<main class="songs-index">
+  <div class="page-header">
+    <h1>All Songs</h1>
+    <a href="/songs/new" class="btn btn-primary">
+      <i class="fas fa-plus"></i> Add New Song
+    </a>
+  </div>
+
+  <% if (songs && songs.length > 0) { %>
+    <div class="search-sort-container">
+      <form action="/songs" method="GET" class="search-form">
+        <input type="text" name="search" placeholder="Search songs..." value="<%= searchQuery || '' %>">
+        <button type="submit"><i class="fas fa-search"></i></button>
+      </form>
+      
+      <div class="sort-options">
+        <span>Sort by:</span>
+        <a href="/songs?sort=title<%= searchQuery ? '&search=' + searchQuery : '' %>" 
+           class="<%= sortBy === 'title' ? 'active' : '' %>">Title</a>
+        <a href="/songs?sort=artist<%= searchQuery ? '&search=' + searchQuery : '' %>" 
+           class="<%= sortBy === 'artist' ? 'active' : '' %>">Artist</a>
+        <a href="/songs?sort=newest<%= searchQuery ? '&search=' + searchQuery : '' %>" 
+           class="<%= sortBy === 'newest' ? 'active' : '' %>">Newest</a>
+      </div>
+    </div>
+
+    <div class="song-list">
+      <% songs.forEach(song => { %>
+        <div class="song-card">
+          <div class="song-info">
+            <h3><a href="/songs/<%= song._id %>"><%= song.title %></a></h3>
+            <p class="artist"><%= song.artist %></p>
+            <% if (song.duration) { %>
+              <span class="duration"><%= song.duration %></span>
+            <% } %>
+          </div>
+          <div class="song-actions">
+            <% if (song.spotifyLink) { %>
+              <a href="<%= song.spotifyLink %>" target="_blank" class="btn btn-spotify">
+                <i class="fab fa-spotify"></i>
+              </a>
+            <% } %>
+            <% if (user && song.addedBy && song.addedBy._id.toString() === user._id) { %>
+              <a href="/songs/<%= song._id %>/edit" class="btn btn-edit">
+                <i class="fas fa-edit"></i>
+              </a>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+    <% if (totalPages > 1) { %>
+      <div class="pagination">
+        <% if (currentPage > 1) { %>
+          <a href="/songs?page=<%= currentPage - 1 %><%= searchQuery ? '&search=' + searchQuery : '' %><%= sortBy ? '&sort=' + sortBy : '' %>">
+            <i class="fas fa-chevron-left"></i> Previous
+          </a>
+        <% } %>
+        
+        <% for (let i = 1; i <= totalPages; i++) { %>
+          <a href="/songs?page=<%= i %><%= searchQuery ? '&search=' + searchQuery : '' %><%= sortBy ? '&sort=' + sortBy : '' %>" 
+             class="<%= i === currentPage ? 'active' : '' %>">
+            <%= i %>
+          </a>
+        <% } %>
+        
+        <% if (currentPage < totalPages) { %>
+          <a href="/songs?page=<%= currentPage + 1 %><%= searchQuery ? '&search=' + searchQuery : '' %><%= sortBy ? '&sort=' + sortBy : '' %>">
+            Next <i class="fas fa-chevron-right"></i>
+          </a>
+        <% } %>
+      </div>
+    <% } %>
+  <% } else { %>
+    <div class="empty-state">
+      <i class="fas fa-music"></i>
+      <p>No songs found</p>
+      <a href="/songs/new" class="btn btn-primary">Add Your First Song</a>
+    </div>
+  <% } %>
+</main>
+
+<%- include('../partials/footer') %>

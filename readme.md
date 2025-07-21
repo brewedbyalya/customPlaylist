@@ -32,7 +32,9 @@ A website where the user can create custom playlists.
 - Express session
 
 ## 📚 Credits / References Used
-- [text](site)
+- [Color Pallet](https://colorhunt.co/palette/f4f6fff3c623eb831710375c)
+- [Images](https://www.pexels.com/)
+- 
 
 
 ## 🚧 Next Steps

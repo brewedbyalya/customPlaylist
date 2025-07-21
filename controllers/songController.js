@@ -2,7 +2,60 @@ const express = require('express');
 const router = express.Router();
 const Song = require('../models/song');
 const Playlist = require('../models/playlist');
+const User = require('../models/user');
 const isSignedIn = require('../middleware/is-signed-in');
+
+// index 
+router.get('/', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+    const searchQuery = req.query.search || '';
+    const sortBy = req.query.sort || '';
+
+    let query = {};
+    let sortOption = { createdAt: -1 };
+
+    if (searchQuery) {
+      query = {
+        $or: [
+          { title: { $regex: searchQuery, $options: 'i' } },
+          { artist: { $regex: searchQuery, $options: 'i' } }
+        ]
+      };
+    }
+
+    if (sortBy === 'title') {
+      sortOption = { title: 1 };
+    } else if (sortBy === 'artist') {
+      sortOption = { artist: 1 };
+    } else if (sortBy === 'newest') {
+      sortOption = { createdAt: -1 };
+    }
+
+    const [songs, count] = await Promise.all([
+      Song.find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort(sortOption)
+        .populate('addedBy')
+        .populate('playlists'),
+      Song.countDocuments(query)
+    ]);
+
+    res.render('songs/index', {
+      songs, currentPage: page, totalPages: Math.ceil(count / limit), searchQuery, sortBy, user: req.session.user
+    });
+  } 
+  
+  catch (error) {
+    console.error(error);
+    res.render('songs/index', {
+      songs: [],
+      error: 'Failed to load songs'});
+  }
+});
 
 // new - get
 router.get('/new', isSignedIn, async (req, res) => {

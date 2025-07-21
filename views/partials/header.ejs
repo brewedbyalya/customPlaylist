@@ -24,21 +24,23 @@
                     
                     <% if (user) { %>
                         <li><a href="/playlists/new">Create</a></li>
-                     <li class="user-menu">
+                        <li class="user-menu">
                             <span class="username">
                                 <i class="fas fa-user-circle"></i> <%= user.username %>
                             </span>
                             <ul class="dropdown">
                                 <li>
-                            <li>
-                                <form action="/auth/sign-out" method="POST" class="logout-form">
-                                    <% if (user) { %>
-                                    <li>
-                                        <a href="/auth/sign-out" class="btn-logout">
+                                    <a href="#" class="btn-profile">
+                                        <i class="fas fa-user"></i> Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/auth/sign-out" class="btn-logout">
                                         <i class="fas fa-sign-out-alt"></i> Sign Out
-                                        </a>
-                                    </li>
-                                    <% } %>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                     <% } else { %>
                         <li><a href="/auth/sign-in" class="btn btn-secondary">Sign In</a></li>
                         <li><a href="/auth/sign-up" class="btn btn-primary">Sign Up</a></li>
