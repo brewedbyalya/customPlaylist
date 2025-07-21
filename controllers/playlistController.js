@@ -9,31 +9,42 @@ const cloudinary = require('../config/cloudinary');
 
 // index
 router.get('/', async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = 10;
-  const skip = (page - 1) * limit;
+  try {
+    let userPlaylists = [];
+    let publicPlaylists = [];
 
-  const [playlists, count] = await Promise.all([
-    Playlist.find({ isPublic: true })
-      .skip(skip)
-      .limit(limit)
+    if (req.session.user) {
+      userPlaylists = await Playlist.find({ createdBy: req.session.user._id })
+        .populate('createdBy')
+        .populate('songs');
+    }
+
+    const limit = req.session.user ? 12 : 6;
+    publicPlaylists = await Playlist.find({ isPublic: true })
       .populate('createdBy')
-      .populate('songs'),
-    Playlist.countDocuments({ isPublic: true })
-  ]);
+      .populate('songs')
+      .limit(limit);
 
-  res.render('playlists/index', { 
-    playlists,
-    currentPage: page,
-    totalPages: Math.ceil(count / limit),
-    user: req.session.user // Added user to view
-  });
+    res.render('playlists/index', {
+      userPlaylists,
+      publicPlaylists,
+      user: req.session.user
+    });
+  } catch (error) {
+    console.error(error);
+    res.render('playlists/index', {
+      userPlaylists: [],
+      publicPlaylists: [],
+      user: req.session.user,
+      error: 'Failed to load playlists'
+    });
+  }
 });
 
 // new - get
 router.get('/new', isSignedIn, (req, res) => {
   res.render('playlists/new', { 
-    user: req.session.user // Added user to view
+    user: req.session.user
   });
 });
 
@@ -41,17 +52,21 @@ router.get('/new', isSignedIn, (req, res) => {
 router.post('/', isSignedIn, upload.single('coverImage'), async (req, res) => {
   try {
     req.body.createdBy = req.session.user._id;
-    req.body.image = {
-      url: req.file.path,
-      cloudinary_id: req.file.fieldname
+    
+    if (req.file) {
+      req.body.image = {
+        url: req.file.path,
+        cloudinary_id: req.file.filename
+      };
     }
+
     const newPlaylist = await Playlist.create(req.body);
     res.redirect(`/playlists/${newPlaylist._id}`);
   } catch (error) {
-    console.error(error);
+    console.error('Upload error:', error);
     res.render('playlists/new', { 
-      error: 'Failed to create playlist',
-      user: req.session.user // Added user to view
+      error: 'Failed to upload image',
+      user: req.session.user
     });
   }
 });
@@ -73,7 +88,7 @@ router.get('/:id', async (req, res) => {
 
     res.render('playlists/show', { 
       playlist,
-      user: req.session.user // Added user to view
+      user: req.session.user
     });
   } catch (error) {
     console.error(error);
@@ -98,7 +113,7 @@ router.get('/:id/edit', isSignedIn, async (req, res) => {
     res.render('playlists/edit', { 
       playlist, 
       songs,
-      user: req.session.user // Added user to view
+      user: req.session.user
     });
   } catch (error) {
     console.error(error);

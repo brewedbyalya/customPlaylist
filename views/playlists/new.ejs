@@ -22,6 +22,21 @@
         </label>
         <input type="file" accept="image/*" id="coverImage" name="coverImage" class="form-input">
       </div>
+
+      <div class="form-group">
+        <label class="form-label">Visibility</label>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="isPublic" value="false" checked>
+            <span class="radio-label">Private <small>(only you can see)</small></span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="isPublic" value="true">
+            <span class="radio-label">Public <small>(visible to everyone)</small></span>
+          </label>
+        </div>
+      </div>
+
       <div class="form-actions">
         <a href="/playlists" class="btn btn-secondary">Cancel</a>
         <button type="submit" class="btn btn-primary">Create Playlist</button>

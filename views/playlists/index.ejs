@@ -1,15 +1,75 @@
 <%- include('../partials/header') %>
-<h1>Your Playlists</h1>
-<a href="/playlists/new">New Playlist</a>
-<a href="/songs">Your Songs</a>
 
+<main class="playlists-index">
+  <% if (user) { %>
+    <section class="user-playlists">
+      <div class="section-header">
+        <h1>Your Playlists</h1>
+        <a href="/playlists/new" class="btn btn-primary">
+          <i class="fas fa-plus"></i> New Playlist
+        </a>
+      </div>
 
-<% playlists.forEach(playlist => { %>
-  <div class="playlist-card">
-    <h3><%= playlist.title %></h3>
-    <p><%= playlist.description %></p>
-    <a href="/playlists/<%= playlist._id %>">View Details</a>
-  </div>
-<% }); %>
+      <% if (userPlaylists.length > 0) { %>
+        <div class="playlist-grid">
+          <% userPlaylists.forEach(playlist => { %>
+            <div class="playlist-card <%= playlist.isPublic ? 'public' : 'private' %>">
+              <a href="/playlists/<%= playlist._id %>">
+                <% if (playlist.image?.url) { %>
+                  <img src="<%= playlist.image.url %>" alt="<%= playlist.title %>">
+                <% } else { %>
+                  <div class="cover-placeholder">
+                    <i class="fas fa-music"></i>
+                  </div>
+                <% } %>
+                <div class="playlist-info">
+                  <h3><%= playlist.title %></h3>
+                  <p><%= playlist.songs.length %> songs</p>
+                  <span class="visibility-badge">
+                    <%= playlist.isPublic ? 'Public' : 'Private' %>
+                  </span>
+                </div>
+              </a>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="empty-state">
+          <p>You haven't created any playlists yet</p>
+          <a href="/playlists/new" class="btn btn-primary">Create your first playlist</a>
+        </div>
+      <% } %>
+    </section>
+  <% } %>
+
+  <section class="public-playlists">
+    <h1><%= user ? 'Public Playlists' : 'Featured Playlists' %></h1>
+    
+    <% if (publicPlaylists.length > 0) { %>
+      <div class="playlist-grid">
+        <% publicPlaylists.forEach(playlist => { %>
+          <a href="/playlists/<%= playlist._id %>" class="playlist-card">
+            <% if (playlist.image?.url) { %>
+              <img src="<%= playlist.image.url %>" alt="<%= playlist.title %>">
+            <% } else { %>
+              <div class="cover-placeholder">
+                <i class="fas fa-music"></i>
+              </div>
+            <% } %>
+            <div class="playlist-info">
+              <h3><%= playlist.title %></h3>
+              <p>By <%= playlist.createdBy.username %></p>
+              <p><%= playlist.songs.length %> songs</p>
+            </div>
+          </a>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="empty-state">
+        <p>No public playlists available</p>
+      </div>
+    <% } %>
+  </section>
+</main>
 
 <%- include('../partials/footer') %>
