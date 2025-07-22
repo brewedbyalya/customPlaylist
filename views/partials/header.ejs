@@ -6,7 +6,7 @@
     <title>Melodrive</title>
     <link rel="stylesheet" href="/stylesheets/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@400;500;600&display=swap" rel="stylesheet"></head>
 <body>
     <header class="main-header">
         <div class="container header-container">
@@ -45,6 +45,18 @@
                         <li><a href="/auth/sign-in" class="btn btn-secondary">Sign In</a></li>
                         <li><a href="/auth/sign-up" class="btn btn-primary">Sign Up</a></li>
                     <% } %>
+
+                        <% if (user && user.spotifyId) { %>
+                            <li class="spotify-connected">
+                                <i class="fab fa-spotify"></i> Spotify Connected
+                            </li>
+                            <% } else if (user) { %>
+                            <li>
+                                <a href="/auth/spotify" class="btn btn-spotify">
+                                <i class="fab fa-spotify"></i> Connect Spotify
+                                </a>
+                            </li>
+                            <% } %>
                 </ul>
             </nav>
         </div>

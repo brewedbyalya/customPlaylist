@@ -22,7 +22,21 @@
       
       <div class="form-group">
         <label for="genre" class="form-label">Genre</label>
-        <input type="text" id="genre" name="genre" class="form-input" value="<%= song.genre || '' %>">
+        <select id="genre" name="genre" class="form-input">
+          <option value="">Select a genre</option>
+          <option value="Pop" <%= song.genre === 'Pop' ? 'selected' : '' %>>Pop</option>
+          <option value="Rock" <%= song.genre === 'Rock' ? 'selected' : '' %>>Rock</option>
+          <option value="Hip-Hop" <%= song.genre === 'Hip-Hop' ? 'selected' : '' %>>Hip-Hop</option>
+          <option value="R&B" <%= song.genre === 'R&B' ? 'selected' : '' %>>R&B</option>
+          <option value="Electronic" <%= song.genre === 'Electronic' ? 'selected' : '' %>>Electronic</option>
+          <option value="Jazz" <%= song.genre === 'Jazz' ? 'selected' : '' %>>Jazz</option>
+          <option value="Classical" <%= song.genre === 'Classical' ? 'selected' : '' %>>Classical</option>
+          <option value="Country" <%= song.genre === 'Country' ? 'selected' : '' %>>Country</option>
+          <option value="Metal" <%= song.genre === 'Metal' ? 'selected' : '' %>>Metal</option>
+          <option value="Alternative" <%= song.genre === 'Alternative' ? 'selected' : '' %>>Alternative</option>
+          <option value="Indie" <%= song.genre === 'Indie' ? 'selected' : '' %>>Indie</option>
+          <option value="Other" <%= song.genre === 'Other' ? 'selected' : '' %>>Other</option>
+        </select>
       </div>
       
       <div class="form-group">

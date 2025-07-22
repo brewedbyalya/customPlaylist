@@ -13,7 +13,9 @@ const passUserToView = require('./middleware/pass-user-to-view');
 const Playlist = require('./models/playlist');
 const playlistController = require('./controllers/playlistController');
 const songController = require('./controllers/songController');
-
+const passport = require('passport');
+require('./config/spotify')(passport);
+const spotifyController = require('./controllers/spotifyController');
 
 // Database
 mongoose.connect(process.env.MONGODB_URI);
@@ -38,6 +40,8 @@ app.use(passUserToView);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views')); 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Routes
 app.get('/', async (req, res) => {
@@ -63,6 +67,7 @@ app.get('/', async (req, res) => {
 app.use('/auth', authController);
 app.use('/playlists', playlistController);
 app.use('/songs', songController);
+app.use('/spotify', spotifyController);
 
 // Server
 const port = process.env.PORT ? process.env.PORT : "3000"

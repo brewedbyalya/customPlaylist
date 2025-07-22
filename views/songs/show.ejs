@@ -34,6 +34,17 @@
     <% } %>
   </div>
   
+<% if (song.spotifyLink) { %>
+  <iframe 
+    src="https://open.spotify.com/embed/track/<%= song.spotifyLink.split('/').pop() %>" 
+    width="300" 
+    height="80" 
+    frameborder="0" 
+    allowtransparency="true" 
+    allow="encrypted-media">
+  </iframe>
+<% } %>
+
   <% if (song.playlists && song.playlists.length > 0) { %>
     <div class="playlists-section">
       <h3>Included in these playlists:</h3>

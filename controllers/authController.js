@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const User = require('../models/user.js');
+const passport = require('passport');
 
 // signup - get
 router.get('/sign-up', (req, res) => {
@@ -63,5 +64,31 @@ router.get("/sign-out", (req, res) => {
   req.session.destroy();
   res.redirect("/");
 });
+
+
+// spotify auth
+router.get('/spotify', 
+  passport.authenticate('spotify', {
+    scope: [
+      'user-read-email', 
+      'user-read-private',
+      'playlist-read-private',
+      'user-library-read'
+    ],
+    showDialog: true
+  })
+);
+
+// spotify callback
+router.get('/spotify/callback', 
+  passport.authenticate('spotify', { failureRedirect: '/auth/sign-in' }),
+  async (req, res) => {
+    await User.findByIdAndUpdate(req.user._id, {
+      spotifyAccessToken: req.user.spotifyAccessToken,
+      spotifyRefreshToken: req.user.spotifyRefreshToken
+    });
+    res.redirect('/');
+  }
+);
 
 module.exports = router;

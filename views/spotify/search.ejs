@@ -1,0 +1,34 @@
+<%- include('../partials/header') %>
+
+<main class="spotify-search">
+  <h1>Search Spotify</h1>
+  
+  <form action="/spotify/search" method="GET" class="search-form">
+    <input type="text" name="q" value="<%= typeof query !== 'undefined' ? query : '' %>" placeholder="Search for songs...">
+    <button type="submit">Search</button>
+  </form>
+  
+  <% if (tracks && tracks.length > 0) { %>
+    <div class="track-list">
+      <% tracks.forEach(track => { %>
+        <div class="track-card">
+          <div class="track-info">
+            <h3><%= track.name %></h3>
+            <p><%= track.artists.map(a => a.name).join(', ') %></p>
+            <p><%= msToTime(track.duration_ms) %></p>
+          </div>
+          <form action="/spotify/import" method="POST">
+            <input type="hidden" name="spotifyId" value="<%= track.id %>">
+            <button type="submit" class="btn btn-import">
+              <i class="fas fa-plus"></i> Import
+            </button>
+          </form>
+        </div>
+      <% }) %>
+    </div>
+  <% } else if (typeof query !== 'undefined') { %>
+    <p>No tracks found.</p>
+  <% } %>
+</main>
+
+<%- include('../partials/footer') %>

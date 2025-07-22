@@ -9,6 +9,9 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    spotifyId: String,
+    spotifyAccessToken: String,
+    spotifyRefreshToken: String,
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);

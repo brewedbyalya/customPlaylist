@@ -5,8 +5,8 @@ const playlistSchema = new Schema({
   title: { type: String, required: true },
   description: String,
   coverImage: {
-        url: { type: String, required: true},
-        cloudinary_id:{type: String, required: true}
+        url: { type: String },
+        cloudinary_id:{ type: String }
       },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
   songs: [{ type: Schema.Types.ObjectId, ref: 'Song' }],

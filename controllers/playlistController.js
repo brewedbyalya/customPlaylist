@@ -51,8 +51,7 @@ router.get('/new', isSignedIn, (req, res) => {
 // new - post
 router.post('/', isSignedIn, upload.single('coverImage'), async (req, res) => {
   try {
-    req.body.createdBy = req.session.user._id;
-    
+    req.body.createdBy = req.session.user._id;    
     if (req.file) {
       req.body.image = {
         url: req.file.path,
