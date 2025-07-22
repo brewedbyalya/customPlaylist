@@ -71,6 +71,6 @@ app.use('/spotify', spotifyController);
 
 // Server
 const port = process.env.PORT ? process.env.PORT : "3000"
-app.listen(port, () => {
+app.listen(port, process.env.HOST, () => {
     console.log(`The express app is ready on port ${port}`);
 });
