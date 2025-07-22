@@ -16,7 +16,7 @@
             <div class="playlist-card <%= playlist.isPublic ? 'public' : 'private' %>">
               <a href="/playlists/<%= playlist._id %>">
                 <% if (playlist.image?.url) { %>
-                  <img src="<%= playlist.image.url %>" alt="<%= playlist.title %>">
+                  <img src="<%= playlist.coverImage %>" alt="<%= playlist.title %>">
                 <% } else { %>
                   <div class="cover-placeholder">
                     <i class="fas fa-music"></i>
@@ -50,7 +50,7 @@
         <% publicPlaylists.forEach(playlist => { %>
           <a href="/playlists/<%= playlist._id %>" class="playlist-card">
             <% if (playlist.image?.url) { %>
-              <img src="<%= playlist.image.url %>" alt="<%= playlist.title %>">
+              <img src="<%= playlist.coverImage %>" alt="<%= playlist.title %>">
             <% } else { %>
               <div class="cover-placeholder">
                 <i class="fas fa-music"></i>

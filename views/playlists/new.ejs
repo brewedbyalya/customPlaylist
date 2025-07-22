@@ -4,7 +4,7 @@
   <div class="form-container">
     <h1 class="form-title">Create New Playlist</h1>
  
-    <form action="/playlists" method="POST" class="playlist-form">
+    <form action="/playlists" method="POST" enctype="multipart/form-data" class="playlist-form">
       <div class="form-group">
         <label for="title" class="form-label">Playlist Title*</label>
         <input type="text" id="title" name="title" class="form-input" required placeholder="Untitled Playlist">

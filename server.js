@@ -7,15 +7,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const authController = require('./controllers/authController');
-const isSignedIn = require('./middleware/is-signed-in');
-const passUserToView = require('./middleware/pass-user-to-view');
-const Playlist = require('./models/playlist');
-const playlistController = require('./controllers/playlistController');
-const songController = require('./controllers/songController');
 const passport = require('passport');
-require('./config/spotify')(passport);
-const spotifyController = require('./controllers/spotifyController');
 
 // Database
 mongoose.connect(process.env.MONGODB_URI);
@@ -30,18 +22,33 @@ app.use(morgan('dev'));
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     store: MongoStore.create({
         mongoUrl: process.env.MONGODB_URI,
-    })
+        ttl: 14 * 24 * 60 * 60
+    }),
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 14,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production'
+    }
 }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Controllers
+const authController = require('./controllers/authController');
+const playlistController = require('./controllers/playlistController');
+const songController = require('./controllers/songController');
+const spotifyController = require('./controllers/spotifyController');
+const passUserToView = require('./middleware/pass-user-to-view');
+
 app.use(passUserToView);
 
+// View Engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views')); 
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(passport.initialize());
-app.use(passport.session());
 
 // Routes
 app.get('/', async (req, res) => {
@@ -53,13 +60,13 @@ app.get('/', async (req, res) => {
     
     res.render('index', { 
       playlists,
-      user: req.session.user
+      user: req.user
     });
   } catch (error) {
     console.error(error);
     res.render('index', { 
       playlists: [],
-      user: req.session.user 
+      user: req.user
     });
   }
 });
@@ -71,6 +78,6 @@ app.use('/spotify', spotifyController);
 
 // Server
 const port = process.env.PORT ? process.env.PORT : "3000"
-app.listen(port, () => {
+app.listen(port, process.env.HOST, () => {
     console.log(`The express app is ready on port ${port}`);
 });

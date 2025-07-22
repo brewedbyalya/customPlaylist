@@ -8,8 +8,7 @@
     </a>
   </div>
 
-  <form action="/playlists/<%= playlist._id %>?_method=PUT" method="POST" class="edit-form">
-    <div class="form-group">
+    <form action="/playlists/<%= playlist._id %>?_method=PUT" method="POST" enctype="multipart/form-data">    <div class="form-group">
       <label for="title" class="form-label">Playlist Title</label>
       <input type="text" id="title" name="title" class="form-input" value="<%= playlist.title %>" required>
     </div>

@@ -195,8 +195,9 @@ a:hover {
 }
 
 .main-header {
-  background-color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -212,74 +213,123 @@ a:hover {
   padding: 0 20px;
 }
 
-.logo {
-  font-size: 1.75rem;
-  font-weight: bold;
-  color: #151515;
+.logo a {
   display: flex;
   align-items: center;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #102E50;
+  text-decoration: none;
 }
 
 .logo i {
-  margin-right: 0.5rem;
-  color: #FFD700; /* Accent yellow */
+  margin-right: 0.6rem;
+  color: #FFD700;
+  font-size: 1.5rem;
 }
 
 .main-nav ul {
   display: flex;
+  align-items: center;
   list-style: none;
-  gap: 1.5rem;
-  padding: 0;
   margin: 0;
+  padding: 0;
+  gap: 1.5rem;
+}
+
+.main-nav li {
+  position: relative;
 }
 
 .main-nav a {
-  color: #151515;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #102E50;
   text-decoration: none;
-  padding: 0.25rem 0;
-  position: relative;
+  padding: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.main-nav a:hover {
+  color: #BE3D2A;
 }
 
 .main-nav a::after {
   content: '';
-  display: block;
+  position: absolute;
+  bottom: 0;
+  left: 0;
   height: 2px;
   width: 0;
-  background: #FFD700;
+  background-color: #E78B48;
   transition: width 0.3s ease;
-  position: absolute;
-  bottom: -5px;
-  left: 0;
 }
 
 .main-nav a:hover::after {
   width: 100%;
 }
 
-.main-nav ul { 
-  list-style: none; display: flex; gap: 2rem; 
-}
-
-.main-nav a {
-  color: #102E50;
-  font-weight: 600;
-  letter-spacing: .5px;
-  padding: .5rem 0;
+.user-menu {
   position: relative;
-  text-transform: uppercase;
-  font-size: .9rem;
+  cursor: pointer;
 }
 
-.main-nav a:after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0;
-  width: 0; height: 2px;
-  background: #E78B48;
-  transition: width .3s ease;
+.username {
+  font-weight: 600;
+  color: #102E50;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
-.main-nav a:hover:after { width: 100%; }
+
+.user-menu .dropdown {
+  display: none;
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  min-width: 160px;
+  z-index: 10;
+  padding: 0.5rem 0;
+}
+
+.user-menu:hover .dropdown {
+  display: block;
+}
+
+.dropdown li {
+  padding: 0;
+}
+
+.dropdown a {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: #102E50;
+  font-weight: 500;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.dropdown a:hover {
+  background: #f4f4f4;
+  color: #BE3D2A;
+}
+
+.spotify-connected {
+  font-size: 0.85rem;
+  color: #1DB954;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
 
 .hero {
   display: flex;
