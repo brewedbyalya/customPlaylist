@@ -58,7 +58,6 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    req.flash('error', 'Failed to load playlists');
     res.render('playlists/index', {
       userPlaylists: [],
       publicPlaylists: [],
@@ -81,6 +80,7 @@ router.get('/new', isSignedIn, (req, res) => {
 router.post('/', isSignedIn, upload.single('coverImage'), async (req, res) => {
   try {
     req.body.createdBy = req.session.user._id;
+
     if (req.file) {
       req.body.coverImage = {
         url: req.file.path,
@@ -98,6 +98,7 @@ router.post('/', isSignedIn, upload.single('coverImage'), async (req, res) => {
     });
   }
 });
+
 
 // show
 router.get('/:id', async (req, res) => {
@@ -149,7 +150,7 @@ router.get('/:id/edit', isSignedIn, async (req, res) => {
 });
 
 // update
-router.put('/:id', isSignedIn, async (req, res) => {
+router.put('/:id', isSignedIn, upload.single('coverImage'), async (req, res) => {
   try {
     const playlist = await Playlist.findById(req.params.id);
 
@@ -157,6 +158,17 @@ router.put('/:id', isSignedIn, async (req, res) => {
 
     if (playlist.createdBy.toString() !== req.session.user._id) {
       return res.redirect('/playlists');
+    }
+
+     if (req.file) {
+      if (playlist.coverImage?.cloudinary_id) {
+        await cloudinary.uploader.destroy(playlist.coverImage.cloudinary_id);
+      }
+
+      playlist.coverImage = {
+        url: req.file.path,
+        cloudinary_id: req.file.filename
+      };
     }
 
     await Playlist.findByIdAndUpdate(req.params.id, req.body);
