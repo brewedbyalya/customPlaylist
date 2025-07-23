@@ -115,7 +115,7 @@ router.get('/:id', async (req, res) => {
     if (!playlist.isPublic && (!req.session.user || playlist.createdBy._id.toString() !== req.session.user._id)) {
       return res.redirect('/playlists');
     }
-
+    console.log(playlist)
     res.render('playlists/show', { 
       playlist,
       user: req.session.user

@@ -1075,7 +1075,7 @@ a:hover {
   padding: 0 1rem;
 }
 
-.search-form {
+.search-form, .search-input {
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;

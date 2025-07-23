@@ -60,7 +60,7 @@ router.get('/', async (req, res) => {
 // new - get
 router.get('/new', isSignedIn, async (req, res) => {
   try {
-    const playlists = await Playlist.find({ addedBy: req.session.user._id });
+    const playlists = await Playlist.find({ createdBy: req.session.user._id });
     res.render('songs/new', { playlists });
   } catch (error) {
     console.error(error);
