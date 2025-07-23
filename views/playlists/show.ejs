@@ -65,11 +65,10 @@
             <% } %>
 
             <% if (locals.user && playlist.createdBy && playlist.createdBy._id.toString() === locals.user._id.toString()) { %>
-                <form action="/playlists/<%= playlist._id %>/songs/<%= song._id %>/delete" method="POST">
-                  <button type="submit" class="btn btn-remove">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </form>
+             <form action="/playlists/<%= playlist._id %>/songs/<%= song._id %>/delete" method="POST" style="display:inline">
+                <button type="submit" class="btn-small btn-danger">
+                  <i class="fas fa-times"></i>
+                </button>
               </form>
             <% } %>
           </div>

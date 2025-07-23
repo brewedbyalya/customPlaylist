@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Playlist = require('../models/playlist');
 const Song = require('../models/song');
 const User = require('../models/user');
@@ -11,39 +12,37 @@ const cloudinary = require('../config/cloudinary');
 router.get('/', async (req, res) => {
   try {
     const { search, filter, sort } = req.query;
-    
     let query = {};
-    
+
     if (search) {
       query.title = { $regex: search, $options: 'i' };
     }
-    
+
     if (filter === 'public') {
       query.isPublic = true;
     } else if (filter === 'private') {
       query.isPublic = false;
     }
-    
-    let sortOption = { createdAt: -1 }; 
-    if (sort === 'oldest') {
-      sortOption = { createdAt: 1 };
-    } else if (sort === 'title') {
-      sortOption = { title: 1 };
-    }
-    
+
+    let sortOption = { createdAt: -1 };
+    if (sort === 'oldest') sortOption = { createdAt: 1 };
+    if (sort === 'title') sortOption = { title: 1 };
+
     let userPlaylists = [];
     if (req.session.user) {
-      userPlaylists = await Playlist.find({ 
+      userPlaylists = await Playlist.find({
         ...query,
-        createdBy: req.session.user._id 
+        createdBy: req.session.user._id
       })
-      .populate('createdBy', 'username')
-      .populate('songs')
-      .sort(sortOption);
+        .populate('createdBy', 'username')
+        .populate('songs')
+        .sort(sortOption);
     }
-    
-    const publicQuery = { ...query, isPublic: true };
-    const publicPlaylists = await Playlist.find(publicQuery)
+
+    const publicPlaylists = await Playlist.find({
+      ...query,
+      isPublic: true
+    })
       .populate('createdBy', 'username')
       .populate('songs')
       .sort(sortOption)
@@ -71,10 +70,9 @@ router.get('/', async (req, res) => {
   }
 });
 
-
 // new - get
 router.get('/new', isSignedIn, (req, res) => {
-  res.render('playlists/new', { 
+  res.render('playlists/new', {
     user: req.session.user
   });
 });
@@ -82,7 +80,7 @@ router.get('/new', isSignedIn, (req, res) => {
 // new - post
 router.post('/', isSignedIn, upload.single('coverImage'), async (req, res) => {
   try {
-    req.body.createdBy = req.session.user._id;    
+    req.body.createdBy = req.session.user._id;
     if (req.file) {
       req.body.coverImage = {
         url: req.file.path,
@@ -94,7 +92,7 @@ router.post('/', isSignedIn, upload.single('coverImage'), async (req, res) => {
     res.redirect(`/playlists/${newPlaylist._id}`);
   } catch (error) {
     console.error('Upload error:', error);
-    res.render('playlists/new', { 
+    res.render('playlists/new', {
       error: 'Failed to upload image',
       user: req.session.user
     });
@@ -107,16 +105,17 @@ router.get('/:id', async (req, res) => {
     const playlist = await Playlist.findById(req.params.id)
       .populate('createdBy')
       .populate('songs');
-    
-    if (!playlist) {
+
+    if (!playlist) return res.redirect('/playlists');
+
+    if (
+      !playlist.isPublic &&
+      (!req.session.user || playlist.createdBy._id.toString() !== req.session.user._id)
+    ) {
       return res.redirect('/playlists');
     }
 
-    if (!playlist.isPublic && (!req.session.user || playlist.createdBy._id.toString() !== req.session.user._id)) {
-      return res.redirect('/playlists');
-    }
-    console.log(playlist)
-    res.render('playlists/show', { 
+    res.render('playlists/show', {
       playlist,
       user: req.session.user
     });
@@ -129,20 +128,17 @@ router.get('/:id', async (req, res) => {
 // edit
 router.get('/:id/edit', isSignedIn, async (req, res) => {
   try {
-    const playlist = await Playlist.findById(req.params.id).populate('songs')
-;
-    
-    if (!playlist) {
-      return res.redirect('/playlists');
-    }
+    const playlist = await Playlist.findById(req.params.id).populate('songs');
+
+    if (!playlist) return res.redirect('/playlists');
 
     if (playlist.createdBy.toString() !== req.session.user._id) {
       return res.redirect('/playlists');
     }
 
     const songs = await Song.find({});
-    res.render('playlists/edit', { 
-      playlist, 
+    res.render('playlists/edit', {
+      playlist,
       songs,
       user: req.session.user
     });
@@ -156,10 +152,8 @@ router.get('/:id/edit', isSignedIn, async (req, res) => {
 router.put('/:id', isSignedIn, async (req, res) => {
   try {
     const playlist = await Playlist.findById(req.params.id);
-    
-    if (!playlist) {
-      return res.redirect('/playlists');
-    }
+
+    if (!playlist) return res.redirect('/playlists');
 
     if (playlist.createdBy.toString() !== req.session.user._id) {
       return res.redirect('/playlists');
@@ -173,14 +167,12 @@ router.put('/:id', isSignedIn, async (req, res) => {
   }
 });
 
-// delete - remove playlist
+// delete playlist
 router.delete('/:id', isSignedIn, async (req, res) => {
   try {
     const playlist = await Playlist.findById(req.params.id);
-    
-    if (!playlist) {
-      return res.redirect('/playlists');
-    }
+
+    if (!playlist) return res.redirect('/playlists');
 
     if (playlist.createdBy.toString() !== req.session.user._id) {
       return res.redirect('/playlists');
@@ -199,41 +191,12 @@ router.delete('/:id', isSignedIn, async (req, res) => {
   }
 });
 
-router.post('/:id/songs/:songId/delete', isSignedIn, async (req, res) => {
-  try {
-    const playlist = await Playlist.findById(req.params.id).populate('songs');
-    
-    if (!playlist) return res.status(404).send('Playlist not found');
-    if (playlist.createdBy.toString() !== req.session.user._id) {
-      return res.status(403).send('Unauthorized');
-    }
-
-    playlist.songs = playlist.songs.filter(
-      songId => songId.toString() !== req.params.songId
-    );
-    await playlist.save();
-
-    await Song.findByIdAndUpdate(
-      req.params.songId,
-      { $pull: { playlists: req.params.id } }
-    );
-
-    res.redirect(`/playlists/${req.params.id}`);
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).redirect('/playlists');
-  }
-});
-
-// new - song to playlist
+// add song to playlist
 router.post('/:id/songs', isSignedIn, async (req, res) => {
   try {
     const playlist = await Playlist.findById(req.params.id);
-    
-    if (!playlist) {
-      return res.redirect('/playlists');
-    }
+
+    if (!playlist) return res.redirect('/playlists');
 
     if (playlist.createdBy.toString() !== req.session.user._id) {
       return res.redirect('/playlists');
@@ -259,18 +222,18 @@ router.post('/:id/songs', isSignedIn, async (req, res) => {
   }
 });
 
-// delete - remove song from playlist
+// remove song from playlist
 router.post('/:id/songs/:songId/delete', isSignedIn, async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id) || 
-        !mongoose.Types.ObjectId.isValid(req.params.songId)) {
+    if (
+      !mongoose.Types.ObjectId.isValid(req.params.id) ||
+      !mongoose.Types.ObjectId.isValid(req.params.songId)
+    ) {
       return res.status(400).send('Invalid ID format');
     }
 
     const playlist = await Playlist.findById(req.params.id);
-    if (!playlist) {
-      return res.status(404).send('Playlist not found');
-    }
+    if (!playlist) return res.status(404).send('Playlist not found');
 
     if (playlist.createdBy.toString() !== req.session.user._id) {
       return res.status(403).send('Unauthorized');
@@ -287,7 +250,6 @@ router.post('/:id/songs/:songId/delete', isSignedIn, async (req, res) => {
     );
 
     res.redirect(`/playlists/${req.params.id}`);
-
   } catch (error) {
     console.error('Delete song error:', error);
     res.status(500).redirect('/playlists');
