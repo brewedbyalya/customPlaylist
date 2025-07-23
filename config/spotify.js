@@ -16,7 +16,7 @@ async (req, accessToken, refreshToken, expires_in, profile, done) => {
         let user;
         if (req.session.user) {
             user = await User.findByIdAndUpdate(
-                req.session.user.id,
+                req.session.user._id,
                 {
                     spotifyId: profile.id,
                     spotifyAccessToken: accessToken,

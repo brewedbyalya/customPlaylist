@@ -4,6 +4,8 @@ const User = require('../models/user');
 const Song = require('../models/song');
 const { refreshSpotifyToken } = require('../utils/spotifyAuth');
 const fetch = require('node-fetch');
+const querystring = require('querystring');
+
 
 async function makeSpotifyRequest(user, endpoint, method = 'GET', body = null) {
   const options = {
@@ -67,18 +69,20 @@ router.get('/search', async (req, res) => {
     }
 
     const query = req.query.q;
+    // console.log(query)
     if (!query) {
       return res.render('spotify/search', { 
         tracks: [],
         user: req.session.user,
-        error: null
+        error: null,
+        query: null
       });
     }
 
     const data = await makeSpotifyRequest(user, `search?q=${encodeURIComponent(query)}&type=track&limit=10`);
     
     const tracks = data.tracks.items.map(track => ({
-      _id: track._id,
+      id: track.id,
       name: track.name,
       artists: track.artists,
       duration_ms: track.duration_ms,
@@ -124,21 +128,17 @@ router.post('/import', async (req, res) => {
 
     const track = await makeSpotifyRequest(user, `tracks/${spotifyId}`);
     
-    // Create the song
     const newSong = await Song.create({
       title: track.name,
       artist: track.artists.map(a => a.name).join(', '),
       duration: msToTime(track.duration_ms),
       spotifyLink: track.external_urls.spotify,
       spotifyId: track.id,
-      createdBy: user.id
+      addedBy: user._id
     });
 
-    return res.json({ 
-      success: true, 
-      songId: newSong.id,
-      redirectUrl: `/songs/${newSong.id}`
-    });
+      return res.redirect(`/songs/${newSong._id}`)
+
 
   } catch (error) {
     console.error('Spotify import error:', error);

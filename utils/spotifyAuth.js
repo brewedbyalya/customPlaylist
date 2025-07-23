@@ -1,5 +1,5 @@
-const https = require('https');
 const User = require('../models/user');
+const querystring = require('querystring');
 
 async function refreshSpotifyToken(userId) {
   try {
@@ -24,7 +24,7 @@ async function refreshSpotifyToken(userId) {
       }
     };
 
-    const response = await makeRequest(options, postData);
+    const response = await fetch(options, postData);
     user.spotifyAccessToken = response.access_token;
     await user.save();
     return response.access_token;

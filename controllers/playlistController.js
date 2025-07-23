@@ -84,13 +84,12 @@ router.post('/', isSignedIn, upload.single('coverImage'), async (req, res) => {
   try {
     req.body.createdBy = req.session.user._id;    
     if (req.file) {
-      req.body.image = {
+      req.body.coverImage = {
         url: req.file.path,
         cloudinary_id: req.file.filename
       };
     }
-      console.log(req.body);
-      console.log(req.session);
+
     const newPlaylist = await Playlist.create(req.body);
     res.redirect(`/playlists/${newPlaylist._id}`);
   } catch (error) {

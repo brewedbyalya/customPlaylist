@@ -232,7 +232,7 @@ router.get('/spotify/callback', async (req, res) => {
     let user;
     if (req.session.user) {
       user = await User.findByIdAndUpdate(
-        req.session.user.id,
+        req.session.user._id,
         { 
           $set: {
             spotifyId: profile.id,
