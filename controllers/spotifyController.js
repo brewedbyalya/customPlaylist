@@ -2,132 +2,111 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const Song = require('../models/song');
+const Playlist = require('../models/playlist');
 const { refreshSpotifyToken } = require('../utils/spotifyAuth');
 const fetch = require('node-fetch');
-const querystring = require('querystring');
 
-
-async function makeSpotifyRequest(user, endpoint, method = 'GET', body = null) {
-  const options = {
-    method,
-    headers: {
-      'Authorization': `Bearer ${user.spotifyAccessToken}`,
-      'Content-Type': 'application/json'
-    }
-  };
-
-  if (body) {
-    options.body = JSON.stringify(body);
-  }
-
+async function makeSpotifyRequest(user, endpoint) {
   try {
-    let response = await fetch(`https://api.spotify.com/v1/${endpoint}`, options);
+    const response = await fetch(`https://api.spotify.com/v1/${endpoint}`, {
+      headers: {
+        'Authorization': `Bearer ${user.spotifyAccessToken}`
+      }
+    });
 
     if (response.status === 401) {
       const newToken = await refreshSpotifyToken(user._id);
       if (!newToken) throw new Error('Token refresh failed');
-
-      options.headers.Authorization = `Bearer ${newToken}`;
-      response = await fetch(`https://api.spotify.com/v1/${endpoint}`, options);
+      
+      const retryResponse = await fetch(`https://api.spotify.com/v1/${endpoint}`, {
+        headers: {
+          'Authorization': `Bearer ${newToken}`
+        }
+      });
+      return await retryResponse.json();
     }
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error?.message || 'Spotify API request failed');
-    }
-
-    return response.json();
+    return await response.json();
   } catch (error) {
     console.error('Spotify API error:', error);
     throw error;
   }
 }
 
-// Convert milliseconds to MM:SS format
-function msToTime(duration) {
-  const minutes = Math.floor(duration / 60000);
-  const seconds = ((duration % 60000) / 1000).toFixed(0);
-  return `${minutes}:${seconds.padStart(2, '0')}`;
-}
-
-// Search Spotify for tracks
+// Search route
 router.get('/search', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.status(401).render('error', { 
-        error: 'Please sign in to access Spotify features',
-        user: null
-      });
+      return res.redirect('/login');
     }
 
     const user = await User.findById(req.session.user._id);
     if (!user || !user.spotifyAccessToken) {
-      return res.status(403).render('error', {
-        error: 'Please connect your Spotify account first',
+      return res.redirect('/settings');
+    }
+
+    const searchTerm = req.query.q;
+    const playlistId = req.query.playlistId;
+
+    if (!searchTerm) {
+      return res.render('spotify/search', {
+        tracks: [],
+        searchTerm: '',
+        playlistId: playlistId || null,
         user: req.session.user
       });
     }
 
-    const query = req.query.q;
-    // console.log(query)
-    if (!query) {
-      return res.render('spotify/search', { 
-        tracks: [],
-        user: req.session.user,
-        error: null,
-        query: null
-      });
-    }
-
-    const data = await makeSpotifyRequest(user, `search?q=${encodeURIComponent(query)}&type=track&limit=10`);
+    const data = await makeSpotifyRequest(user, `search?q=${encodeURIComponent(searchTerm)}&type=track&limit=10`);
     
     const tracks = data.tracks.items.map(track => ({
       id: track.id,
       name: track.name,
-      artists: track.artists,
-      duration_ms: track.duration_ms,
+      artists: track.artists.map(a => a.name).join(', '),
+      duration: msToTime(track.duration_ms),
       album: track.album.name,
       image: track.album.images[0]?.url,
       spotifyLink: track.external_urls.spotify
     }));
 
-    res.render('spotify/search', { 
+    res.render('spotify/search', {
       tracks,
-      msToTime,
-      query,
-      user: req.session.user,
-      error: null
+      searchTerm,
+      playlistId: playlistId || null,
+      user: req.session.user
     });
 
   } catch (error) {
-    console.error('Spotify search error:', error);
-    res.status(500).render('spotify/search', {
+    console.error('Search error:', error);
+    res.render('spotify/search', {
       tracks: [],
+      searchTerm: req.query.q || '',
+      playlistId: req.query.playlistId || null,
       user: req.session.user,
-      error: 'Failed to search Spotify. Please try again.'
+      error: 'Search failed'
     });
   }
 });
 
-// Import track from Spotify
+// Import route
 router.post('/import', async (req, res) => {
   try {
     if (!req.session.user) {
-      return res.status(401).json({ error: 'Please sign in to import tracks' });
+      return res.status(401).send('Please sign in');
     }
 
     const user = await User.findById(req.session.user._id);
     if (!user || !user.spotifyAccessToken) {
-      return res.status(403).json({ error: 'Please connect your Spotify account first' });
+      return res.status(403).send('Connect Spotify account first');
     }
 
-    const { spotifyId } = req.body;
+    const { spotifyId, playlistId } = req.body;
     if (!spotifyId) {
-      return res.status(400).json({ error: 'Missing track ID' });
+      return res.status(400).send('Missing track ID');
     }
 
     const track = await makeSpotifyRequest(user, `tracks/${spotifyId}`);
-    
+
     const newSong = await Song.create({
       title: track.name,
       artist: track.artists.map(a => a.name).join(', '),
@@ -137,15 +116,27 @@ router.post('/import', async (req, res) => {
       addedBy: user._id
     });
 
-      return res.redirect(`/songs/${newSong._id}`)
+    if (playlistId) {
+      await Playlist.findByIdAndUpdate(playlistId, {
+        $addToSet: { songs: newSong._id }
+      });
+      return res.redirect(`/playlists/${playlistId}/edit`);
+    }
 
+    res.redirect(`/songs/${newSong._id}`);
 
   } catch (error) {
-    console.error('Spotify import error:', error);
-    return res.status(500).json({ 
-      error: 'Failed to import track. Please try again.' 
-    });
+    console.error('Import error:', error);
+    res.redirect(req.body.playlistId 
+      ? `/playlists/${req.body.playlistId}/edit` 
+      : '/spotify/search');
   }
 });
+
+function msToTime(duration) {
+  const minutes = Math.floor(duration / 60000);
+  const seconds = ((duration % 60000) / 1000).toFixed(0);
+  return `${minutes}:${seconds.padStart(2, '0')}`;
+}
 
 module.exports = router;

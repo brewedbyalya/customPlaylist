@@ -1,71 +1,61 @@
 <%- include('../partials/header') %>
 
-<main class="container">
-  <div class="spotify-search">
-    <h1>Search Spotify</h1>
-    
-    <form action="/spotify/search" method="GET" class="search-form">
-      <div class="form-group">
-        
-        <% if (playlistId) { %>
-  <div class="import-context">
-    <p>
-      <i class="fas fa-music"></i> 
-      Importing to playlist: 
-      <a href="/playlists/<%= playlistId %>/edit"><%= playlistId %></a>
-    </p>
-  </div>
-<% } %>
-
-        <input type="text" name="q" value="<%= query || '' %>" placeholder="Search for a song..." class="search-input">
-        <button type="submit" class="search-button">
-          <i class="fas fa-search"></i> Search
-        </button>
-      </div>
-    </form>
-
-    <% if (tracks && tracks.length > 0) { %>
-      <div class="track-list">
-        <% tracks.forEach(track => { %>
-          <div class="track-card">
-            <% if (track.image) { %>
-              <img src="<%= track.image %>" alt="Album cover" class="track-image">
-            <% } %>
-            
-            <div class="track-info">
-              <h3><%= track.name %></h3>
-              <p class="artist"><%= track.artists.map(a => a.name).join(', ') %></p>
-              <p class="album"><%= track.album %></p>
-              <p class="duration"><%= msToTime(track.duration_ms) %></p>
-            </div>
-            
-            <form action="/spotify/import" method="POST" class="import-form">
-              <input type="hidden" name="spotifyId" value="<%= track.id %>">
-
-                <% if (playlistId) { %>
-                    <input type="hidden" name="playlistId" value="<%= playlistId %>">
-                  <% } %>
-                  
-                  <button type="submit" class="btn btn-import">
-                    <i class="fas fa-plus"></i> Import
-                  </button>
-                </form>
-
-              <button type="submit" class="btn btn-import">
-                <i class="fas fa-plus"></i> Import
-              </button>
-            </form>
-            
-            <a href="<%= track.spotifyLink %>" target="_blank" class="btn btn-spotify">
-              <i class="fab fa-spotify"></i>
-            </a>
-          </div>
-        <% }) %>
-      </div>
-    <% } else if (query) { %>
-      <p>No tracks found for "<%= query %>"</p>
+<div>
+  <h1>Search Spotify</h1>
+  
+  <form action="/spotify/search" method="GET">
+    <% if (locals.playlistId) { %>
+      <input type="hidden" name="playlistId" value="<%= playlistId %>">
     <% } %>
-  </div>
-</main>
+    
+    <input 
+      type="text" 
+      name="q" 
+      value="<%= typeof searchTerm !== 'undefined' ? searchTerm : '' %>" 
+      placeholder="Search songs..."
+    >
+    <button type="submit">Search</button>
+  </form>
+
+  <% if (typeof searchTerm !== 'undefined' && searchTerm !== '') { %>
+    <h2>Results for "<%= searchTerm %>"</h2>
+    <% if (locals.playlistId) { %>
+      <p>Adding to playlist</p>
+    <% } %>
+  <% } %>
+
+  <% if (typeof tracks !== 'undefined' && tracks.length > 0) { %>
+    <div>
+      <% tracks.forEach(track => { %>
+        <div>
+          <% if (track.image) { %>
+            <img src="<%= track.image %>" width="50" height="50">
+          <% } %>
+          
+          <div>
+            <h3><%= track.name %></h3>
+            <p><%= track.artists %></p>
+            <p><%= track.album %></p>
+            <p><%= track.duration %></p>
+          </div>
+
+          <form action="/spotify/import" method="POST">
+            <% if (locals.playlistId) { %>
+              <input type="hidden" name="playlistId" value="<%= playlistId %>">
+            <% } %>
+            <input type="hidden" name="spotifyId" value="<%= track.id %>">
+            <button type="submit">Import</button>
+          </form>
+
+          <a href="<%= track.spotifyLink %>" target="_blank">Open in Spotify</a>
+        </div>
+      <% }) %>
+    </div>
+  <% } else if (typeof searchTerm !== 'undefined' && searchTerm !== '') { %>
+    <p>No tracks found for "<%= searchTerm %>"</p>
+  <% } else { %>
+    <p>Enter a search term to find songs</p>
+  <% } %>
+</div>
 
 <%- include('../partials/footer') %>

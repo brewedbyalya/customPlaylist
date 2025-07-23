@@ -129,7 +129,8 @@ router.get('/:id', async (req, res) => {
 // edit
 router.get('/:id/edit', isSignedIn, async (req, res) => {
   try {
-    const playlist = await Playlist.findById(req.params.id);
+    const playlist = await Playlist.findById(req.params.id).populate('songs')
+;
     
     if (!playlist) {
       return res.redirect('/playlists');
@@ -198,6 +199,33 @@ router.delete('/:id', isSignedIn, async (req, res) => {
   }
 });
 
+router.post('/:id/songs/:songId/delete', isSignedIn, async (req, res) => {
+  try {
+    const playlist = await Playlist.findById(req.params.id).populate('songs');
+    
+    if (!playlist) return res.status(404).send('Playlist not found');
+    if (playlist.createdBy.toString() !== req.session.user._id) {
+      return res.status(403).send('Unauthorized');
+    }
+
+    playlist.songs = playlist.songs.filter(
+      songId => songId.toString() !== req.params.songId
+    );
+    await playlist.save();
+
+    await Song.findByIdAndUpdate(
+      req.params.songId,
+      { $pull: { playlists: req.params.id } }
+    );
+
+    res.redirect(`/playlists/${req.params.id}`);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).redirect('/playlists');
+  }
+});
+
 // new - song to playlist
 router.post('/:id/songs', isSignedIn, async (req, res) => {
   try {
@@ -232,16 +260,20 @@ router.post('/:id/songs', isSignedIn, async (req, res) => {
 });
 
 // delete - remove song from playlist
-router.delete('/:id/songs/:songId', isSignedIn, async (req, res) => {
+router.post('/:id/songs/:songId/delete', isSignedIn, async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id) || 
+        !mongoose.Types.ObjectId.isValid(req.params.songId)) {
+      return res.status(400).send('Invalid ID format');
+    }
+
     const playlist = await Playlist.findById(req.params.id);
-    
     if (!playlist) {
-      return res.redirect('/playlists');
+      return res.status(404).send('Playlist not found');
     }
 
     if (playlist.createdBy.toString() !== req.session.user._id) {
-      return res.redirect('/playlists');
+      return res.status(403).send('Unauthorized');
     }
 
     playlist.songs = playlist.songs.filter(
@@ -254,10 +286,11 @@ router.delete('/:id/songs/:songId', isSignedIn, async (req, res) => {
       { $pull: { playlists: req.params.id } }
     );
 
-    res.redirect(`/playlists/${req.params.id}/edit`);
+    res.redirect(`/playlists/${req.params.id}`);
+
   } catch (error) {
-    console.error(error);
-    res.redirect('/playlists');
+    console.error('Delete song error:', error);
+    res.status(500).redirect('/playlists');
   }
 });
 
