@@ -7,39 +7,70 @@ const isSignedIn = require('../middleware/is-signed-in');
 const upload = require('../config/multer');
 const cloudinary = require('../config/cloudinary');
 
-// index
+// index + search
 router.get('/', async (req, res) => {
   try {
-    let userPlaylists = [];
-    let publicPlaylists = [];
-
-    if (req.session.user) {
-      userPlaylists = await Playlist.find({ createdBy: req.session.user._id })
-        .populate('createdBy')
-        .populate('songs');
+    const { search, filter, sort } = req.query;
+    
+    let query = {};
+    
+    if (search) {
+      query.title = { $regex: search, $options: 'i' };
     }
-
-    const limit = req.session.user ? 12 : 6;
-    publicPlaylists = await Playlist.find({ isPublic: true })
-      .populate('createdBy')
+    
+    if (filter === 'public') {
+      query.isPublic = true;
+    } else if (filter === 'private') {
+      query.isPublic = false;
+    }
+    
+    let sortOption = { createdAt: -1 }; 
+    if (sort === 'oldest') {
+      sortOption = { createdAt: 1 };
+    } else if (sort === 'title') {
+      sortOption = { title: 1 };
+    }
+    
+    let userPlaylists = [];
+    if (req.session.user) {
+      userPlaylists = await Playlist.find({ 
+        ...query,
+        createdBy: req.session.user._id 
+      })
+      .populate('createdBy', 'username')
       .populate('songs')
-      .limit(limit);
+      .sort(sortOption);
+    }
+    
+    const publicQuery = { ...query, isPublic: true };
+    const publicPlaylists = await Playlist.find(publicQuery)
+      .populate('createdBy', 'username')
+      .populate('songs')
+      .sort(sortOption)
+      .limit(req.session.user ? 12 : 6);
 
     res.render('playlists/index', {
       userPlaylists,
       publicPlaylists,
-      user: req.session.user
+      user: req.session.user,
+      searchQuery: search || '',
+      filter: filter || '',
+      sort: sort || 'newest'
     });
   } catch (error) {
     console.error(error);
+    req.flash('error', 'Failed to load playlists');
     res.render('playlists/index', {
       userPlaylists: [],
       publicPlaylists: [],
       user: req.session.user,
-      error: 'Failed to load playlists'
+      searchQuery: '',
+      filter: '',
+      sort: 'newest'
     });
   }
 });
+
 
 // new - get
 router.get('/new', isSignedIn, (req, res) => {
@@ -58,7 +89,8 @@ router.post('/', isSignedIn, upload.single('coverImage'), async (req, res) => {
         cloudinary_id: req.file.filename
       };
     }
-
+      console.log(req.body);
+      console.log(req.session);
     const newPlaylist = await Playlist.create(req.body);
     res.redirect(`/playlists/${newPlaylist._id}`);
   } catch (error) {

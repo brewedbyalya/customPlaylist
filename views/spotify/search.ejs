@@ -4,30 +4,56 @@
   <h1>Search Spotify</h1>
   
   <form action="/spotify/search" method="GET" class="search-form">
-    <input type="text" name="q" value="<%= typeof query !== 'undefined' ? query : '' %>" placeholder="Search for songs...">
-    <button type="submit">Search</button>
+    <input 
+      type="text" 
+      name="q" 
+      value="<%= typeof query !== 'undefined' ? query : '' %>" 
+      placeholder="Search for songs..."
+      required
+    >
+    <button type="submit">
+      <i class="fas fa-search"></i> Search
+    </button>
   </form>
   
+  <% if (error) { %>
+    <div class="alert alert-error">
+      <p><%= error %></p>
+    </div>
+  <% } %>
+
   <% if (tracks && tracks.length > 0) { %>
     <div class="track-list">
       <% tracks.forEach(track => { %>
         <div class="track-card">
+          <% if (track.image) { %>
+            <img src="<%= track.image %>" alt="Album cover" class="track-image">
+          <% } %>
+          
           <div class="track-info">
             <h3><%= track.name %></h3>
-            <p><%= track.artists.map(a => a.name).join(', ') %></p>
-            <p><%= msToTime(track.duration_ms) %></p>
+            <p class="artist"><%= track.artists.map(a => a.name).join(', ') %></p>
+            <p class="album"><%= track.album %></p>
+            <p class="duration"><%= msToTime(track.duration_ms) %></p>
           </div>
-          <form action="/spotify/import" method="POST">
+          
+          <form class="import-form" data-trackid="<%= track.id %>">
             <input type="hidden" name="spotifyId" value="<%= track.id %>">
             <button type="submit" class="btn btn-import">
               <i class="fas fa-plus"></i> Import
             </button>
           </form>
+          
+          <a href="<%= track.spotifyLink %>" target="_blank" class="btn btn-spotify">
+            <i class="fab fa-spotify"></i> Open in Spotify
+          </a>
         </div>
       <% }) %>
     </div>
-  <% } else if (typeof query !== 'undefined') { %>
-    <p>No tracks found.</p>
+  <% } else if (typeof query !== 'undefined' && query !== '') { %>
+    <div class="no-results">
+      <p>No tracks found for "<%= query %>"</p>
+    </div>
   <% } %>
 </main>
 

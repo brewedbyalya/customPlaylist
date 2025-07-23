@@ -5,6 +5,13 @@
 
     <form action="/auth/sign-up" method="POST" class="auth-form">
       <div class="form-group">
+        <label for="email" class="form-label">
+          <i class="fas fa-envelope"></i> Email
+        </label>
+        <input type="email" name="email" id="email" class="form-input" required>
+      </div>
+      
+      <div class="form-group">
         <label for="username" class="form-label">
           <i class="fas fa-user"></i> Username
         </label>
@@ -15,7 +22,7 @@
         <label for="password" class="form-label">
           <i class="fas fa-lock"></i> Password
         </label>
-        <input type="password" name="password" id="password" class="form-input" required>
+        <input type="password" name="password" id="password" class="form-input" required minlength="6">
       </div>
       
       <div class="form-group">
@@ -32,6 +39,8 @@
     
     <div class="auth-footer">
       Already have an account? <a href="/auth/sign-in">Sign in</a>
+      <br>
+      Or sign up with <a href="/auth/spotify"><i class="fab fa-spotify"></i> Spotify</a>
     </div>
   </div>
 </div>

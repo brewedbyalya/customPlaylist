@@ -7,7 +7,7 @@
 <div class="hero">
   <div class="hero-content">
     <h1 class="hero-title">Organize Your Music</h1>
-    <p class="hero-subtitle">Create, manage, and share your perfect playlists</p>
+    <p class="hero-subtitle">Create, manage, and share your perfect playlists.</p>
     <div class="hero-actions">
       <% if (!user) { %>
         <a href="/auth/sign-up" class="btn btn-primary">Get Started</a>
@@ -62,7 +62,7 @@
           <% } %>
           <div class="playlist-info">
             <h3><%= playlist.title %></h3>
-            <p>By <%= playlist.createdBy.username %></p>
+<p>By <%= playlist.createdBy && playlist.createdBy.username ? playlist.createdBy.username : "Unknown" %></p>
             <p><%= playlist.songs.length %> songs</p>
           </div>
         </a>

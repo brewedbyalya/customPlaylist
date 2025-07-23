@@ -7,14 +7,14 @@ const path = require('path');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const fetch = require('node-fetch');
+const querystring = require('querystring');
 const authController = require('./controllers/authController');
 const isSignedIn = require('./middleware/is-signed-in');
 const passUserToView = require('./middleware/pass-user-to-view');
 const Playlist = require('./models/playlist');
 const playlistController = require('./controllers/playlistController');
 const songController = require('./controllers/songController');
-const passport = require('passport');
-require('./config/spotify')(passport);
 const spotifyController = require('./controllers/spotifyController');
 
 // Database
@@ -40,8 +40,21 @@ app.use(passUserToView);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views')); 
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(passport.initialize());
-app.use(passport.session());
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    ttl: 14 * 24 * 60 * 60
+  }),
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 14,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production'
+  }
+}));
 
 // Routes
 app.get('/', async (req, res) => {

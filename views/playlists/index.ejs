@@ -1,10 +1,71 @@
 <%- include('../partials/header') %>
 
 <main class="playlists-index">
+  <div class="search-container">
+    <form action="/playlists" method="GET" class="search-form">
+      <div class="search-input-group">
+        <input 
+          type="text" 
+          name="search" 
+          placeholder="Search playlists by title..." 
+          value="<%= searchQuery || '' %>"
+          class="search-input"
+          aria-label="Search playlists"
+        >
+        <button type="submit" class="search-button" aria-label="Submit search">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+      
+      <div class="search-controls">
+        <div class="filter-group">
+          <label for="filter" class="filter-label">
+            <i class="fas fa-filter"></i> Filter:
+          </label>
+          <select id="filter" name="filter" class="filter-select">
+            <option value="">All Playlists</option>
+            <option value="public" <%= filter === 'public' ? 'selected' : '' %>>Public Only</option>
+            <option value="private" <%= filter === 'private' ? 'selected' : '' %>>Private Only</option>
+          </select>
+        </div>
+        
+        <div class="sort-group">
+          <label for="sort" class="sort-label">
+            <i class="fas fa-sort"></i> Sort:
+          </label>
+          <select id="sort" name="sort" class="sort-select">
+            <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Newest First</option>
+            <option value="oldest" <%= sort === 'oldest' ? 'selected' : '' %>>Oldest First</option>
+            <option value="title" <%= sort === 'title' ? 'selected' : '' %>>Title (A-Z)</option>
+          </select>
+        </div>
+      </div>
+    </form>
+    
+    <% if (searchQuery || filter) { %>
+      <div class="search-results-meta">
+        <p class="results-count">
+          Found <%= userPlaylists.length + publicPlaylists.length %> playlists
+          <% if (searchQuery) { %>
+            matching "<strong><%= searchQuery %></strong>"
+          <% } %>
+          <% if (filter === 'public') { %>
+            (Public only)
+          <% } else if (filter === 'private') { %>
+            (Private only)
+          <% } %>
+        </p>
+        <a href="/playlists" class="btn btn-clear">
+          <i class="fas fa-times"></i> Clear filters
+        </a>
+      </div>
+    <% } %>
+  </div>
+
   <% if (user) { %>
-    <section class="user-playlists">
+    <section class="user-playlists section-container">
       <div class="section-header">
-        <h1>Your Playlists</h1>
+        <h2>Your Playlists</h2>
         <a href="/playlists/new" class="btn btn-primary">
           <i class="fas fa-plus"></i> New Playlist
         </a>
@@ -15,19 +76,22 @@
           <% userPlaylists.forEach(playlist => { %>
             <div class="playlist-card <%= playlist.isPublic ? 'public' : 'private' %>">
               <a href="/playlists/<%= playlist._id %>">
-                <% if (playlist.image?.url) { %>
-                  <img src="<%= playlist.image.url %>" alt="<%= playlist.title %>">
+                <% if (playlist.coverImage && playlist.coverImage.url) { %>
+                  <img src="<%= playlist.coverImage.url %>" alt="<%= playlist.title %> cover" class="playlist-cover">
                 <% } else { %>
-                  <div class="cover-placeholder">
+                  <div class="playlist-cover placeholder">
                     <i class="fas fa-music"></i>
                   </div>
                 <% } %>
                 <div class="playlist-info">
                   <h3><%= playlist.title %></h3>
-                  <p><%= playlist.songs.length %> songs</p>
+                  <p><%= playlist.songs ? playlist.songs.length : 0 %> songs</p>
                   <span class="visibility-badge">
                     <%= playlist.isPublic ? 'Public' : 'Private' %>
                   </span>
+                  <% if (!playlist.isPublic) { %>
+                    <div class="private-notice">(Only visible to you)</div>
+                  <% } %>
                 </div>
               </a>
             </div>
@@ -35,38 +99,43 @@
         </div>
       <% } else { %>
         <div class="empty-state">
-          <p>You haven't created any playlists yet</p>
+          <i class="fas fa-music"></i>
+          <p>No playlists found</p>
           <a href="/playlists/new" class="btn btn-primary">Create your first playlist</a>
         </div>
       <% } %>
     </section>
   <% } %>
 
-  <section class="public-playlists">
-    <h1><%= user ? 'Public Playlists' : 'Featured Playlists' %></h1>
+  <section class="public-playlists section-container">
+    <h2><%= user ? 'Discover Public Playlists' : 'Featured Playlists' %></h2>
     
     <% if (publicPlaylists.length > 0) { %>
       <div class="playlist-grid">
         <% publicPlaylists.forEach(playlist => { %>
           <a href="/playlists/<%= playlist._id %>" class="playlist-card">
-            <% if (playlist.image?.url) { %>
-              <img src="<%= playlist.image.url %>" alt="<%= playlist.title %>">
+            <% if (playlist.coverImage && playlist.coverImage.url) { %>
+              <img src="<%= playlist.coverImage.url %>" alt="<%= playlist.title %> cover" class="playlist-cover">
             <% } else { %>
-              <div class="cover-placeholder">
+              <div class="playlist-cover placeholder">
                 <i class="fas fa-music"></i>
               </div>
             <% } %>
             <div class="playlist-info">
               <h3><%= playlist.title %></h3>
-              <p>By <%= playlist.createdBy.username %></p>
-              <p><%= playlist.songs.length %> songs</p>
+              <p>By <%= playlist.createdBy && playlist.createdBy.username ? playlist.createdBy.username : 'Unknown' %></p>
+              <p><%= playlist.songs ? playlist.songs.length : 0 %> songs</p>
             </div>
           </a>
         <% }) %>
       </div>
     <% } else { %>
       <div class="empty-state">
+        <i class="fas fa-music"></i>
         <p>No public playlists available</p>
+        <% if (user) { %>
+          <a href="/playlists/new" class="btn btn-primary">Create a playlist</a>
+        <% } %>
       </div>
     <% } %>
   </section>

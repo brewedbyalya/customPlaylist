@@ -21,7 +21,8 @@ genre: {
       'Indie',
       'Other'
     ]
-  },  spotifyLink: String,
+  },  
+  spotifyLink: String,
   addedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   playlists: [{ type: Schema.Types.ObjectId, ref: 'Playlist' }],
 }, { timestamps: true });

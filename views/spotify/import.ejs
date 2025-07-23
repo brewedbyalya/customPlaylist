@@ -1,0 +1,26 @@
+<%- include('../partials/header') %>
+
+<main class="import-confirmation">
+  <div class="track-card">
+    <% if (track.image) { %>
+      <img src="<%= track.image %>" alt="Album cover" class="track-image">
+    <% } %>
+    <div class="track-details">
+      <h2>Confirm Import</h2>
+      <h3><%= track.name %></h3>
+      <p>by <%= track.artists.map(a => a.name).join(', ') %></p>
+      <p>Duration: <%= msToTime(track.duration_ms) %></p>
+      <p>Album: <%= track.album %></p>
+      
+      <form action="/spotify/import" method="POST">
+        <input type="hidden" name="spotifyId" value="<%= track.id %>">
+        <div class="form-actions">
+          <a href="/spotify/search?q=<%= query %>" class="btn btn-cancel">Cancel</a>
+          <button type="submit" class="btn btn-confirm">Confirm Import</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

@@ -8,7 +8,7 @@ const playlistSchema = new Schema({
         url: { type: String },
         cloudinary_id:{ type: String }
       },
-  createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  createdBy: { type: Schema.Types.ObjectId, ref: 'User'},
   songs: [{ type: Schema.Types.ObjectId, ref: 'Song' }],
   isPublic: { type: Boolean, default: false },
 }, { timestamps: true });

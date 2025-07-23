@@ -1,6 +1,6 @@
 const SpotifyWebApi = require('spotify-web-api-node');
 
-const createSpotifyApi = (user) => {  // Accept entire user object
+const createSpotifyApi = (user) => { 
   if (!user || !user.spotifyAccessToken) {
     throw new Error('User not authenticated with Spotify');
   }
