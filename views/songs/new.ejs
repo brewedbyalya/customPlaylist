@@ -5,6 +5,11 @@
     <h1 class="form-title">Add New Song</h1>
     
     <form action="/songs" method="POST" class="song-form">
+
+      <% if (locals.playlistId) { %>
+        <input type="hidden" name="playlistId" value="<%= playlistId %>">
+      <% } %>
+
       <div class="form-group">
         <label for="title" class="form-label">Song Title*</label>
         <input type="text" id="title" name="title" class="form-input" required>

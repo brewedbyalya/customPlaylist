@@ -39,9 +39,9 @@
   <div class="song-management">
     <h2 class="section-title">Songs</h2>
 <% if (locals.user && playlist.createdBy && playlist.createdBy._id && playlist.createdBy._id.toString() === locals.user._id.toString()) { %>
-      <a href="/songs/new" class="btn btn-add-song">
-        <i class="fas fa-plus"></i> Add Song
-      </a>
+  <a href="/songs/new?playlistId=<%= playlist._id %>" class="btn btn-add-song">
+    <i class="fas fa-plus"></i> Add Song
+  </a>
     <% } %>
   </div>
 

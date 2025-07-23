@@ -25,6 +25,7 @@ genre: {
   spotifyLink: String,
   addedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   playlists: [{ type: Schema.Types.ObjectId, ref: 'Playlist' }],
+  playlistId: String,
 }, { timestamps: true });
 
 const Song = mongoose.model('Song', songSchema);

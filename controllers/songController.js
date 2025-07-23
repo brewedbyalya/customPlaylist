@@ -61,7 +61,11 @@ router.get('/', async (req, res) => {
 router.get('/new', isSignedIn, async (req, res) => {
   try {
     const playlists = await Playlist.find({ createdBy: req.session.user._id });
-    res.render('songs/new', { playlists });
+    
+    res.render('songs/new', { 
+      playlists,
+      playlistId: req.query.playlistId 
+    });
   } catch (error) {
     console.error(error);
     res.redirect('/');
@@ -74,7 +78,13 @@ router.post('/', isSignedIn, async (req, res) => {
     req.body.addedBy = req.session.user._id;
     const newSong = await Song.create(req.body);
     
-    // song to playlist
+    if (req.body.playlistId) {
+      await Playlist.findByIdAndUpdate(
+        req.body.playlistId,
+        { $addToSet: { songs: newSong._id } }
+      );
+    }
+
     if (req.body.playlists) {
       const playlists = Array.isArray(req.body.playlists) ? req.body.playlists : [req.body.playlists];
       
@@ -89,6 +99,12 @@ router.post('/', isSignedIn, async (req, res) => {
           { $addToSet: { playlists: { $each: playlists } } }
         )
       ]);
+    }
+    
+    res.redirect(`/songs/${newSong._id}`);
+
+     if (req.body.playlistId) {
+      return res.redirect(`/playlists/${req.body.playlistId}/edit`);
     }
     
     res.redirect(`/songs/${newSong._id}`);

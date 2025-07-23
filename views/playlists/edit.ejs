@@ -42,6 +42,37 @@
           <input type="radio" name="isPublic" value="true" <%= playlist.isPublic ? 'checked' : '' %>>
           <span class="radio-label">Public</span>
         </label>
+
+        <div class="current-songs">
+        <% if (playlist.songs && playlist.songs.length > 0) { %>
+          <ul>
+            <% playlist.songs.forEach(song => { %>
+              <li>
+                <%= song.title %> - <%= song.artist %>
+                <form action="/playlists/<%= playlist._id %>/songs/<%= song._id %>?_method=DELETE" 
+                      method="POST" style="display:inline">
+                  <button type="submit" class="btn-small btn-danger">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </form>
+              </li>
+            <% }) %>
+          </ul>
+        <% } else { %>
+          <p>No songs in this playlist yet...</p>
+        <% } %>
+      </div>
+
+        <div class="add-song-option">
+          <a href="/songs/new?playlistId=<%= playlist._id %>" class="btn btn-primary">
+           <i class="fas fa-plus"></i> Create New Song
+          </a>
+
+            <a href="/spotify/search?playlistId=<%= playlist._id %>" class="btn btn-spotify">
+              <i class="fab fa-spotify"></i> Import from Spotify
+            </a>
+</div>
+
       </div>
     </div>
 

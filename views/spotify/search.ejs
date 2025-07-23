@@ -6,6 +6,17 @@
     
     <form action="/spotify/search" method="GET" class="search-form">
       <div class="form-group">
+        
+        <% if (playlistId) { %>
+  <div class="import-context">
+    <p>
+      <i class="fas fa-music"></i> 
+      Importing to playlist: 
+      <a href="/playlists/<%= playlistId %>/edit"><%= playlistId %></a>
+    </p>
+  </div>
+<% } %>
+
         <input type="text" name="q" value="<%= query || '' %>" placeholder="Search for a song..." class="search-input">
         <button type="submit" class="search-button">
           <i class="fas fa-search"></i> Search
@@ -30,6 +41,16 @@
             
             <form action="/spotify/import" method="POST" class="import-form">
               <input type="hidden" name="spotifyId" value="<%= track.id %>">
+
+                <% if (playlistId) { %>
+                    <input type="hidden" name="playlistId" value="<%= playlistId %>">
+                  <% } %>
+                  
+                  <button type="submit" class="btn btn-import">
+                    <i class="fas fa-plus"></i> Import
+                  </button>
+                </form>
+
               <button type="submit" class="btn btn-import">
                 <i class="fas fa-plus"></i> Import
               </button>

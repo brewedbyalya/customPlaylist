@@ -6,9 +6,8 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'playlist-covers',
-    allowed_formats: ['jpg', 'jpeg', 'png'],
-    transformation: [{ width: 500, height: 500, crop: 'limit' }]
-  }
+    allowed_formats: ['jpg', 'jpeg', 'png']
+    }
 });
 
 module.exports = multer({ storage: storage });
