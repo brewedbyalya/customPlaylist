@@ -1,9 +1,9 @@
 <%- include('../partials/header') %>
 
-<div>
-  <h1>Search Spotify</h1>
+<div class="spotify-search">
+  <h1 class="search-title">Search Spotify</h1>
   
-  <form action="/spotify/search" method="GET">
+  <form class="search-form" action="/spotify/search" method="GET">
     <% if (locals.playlistId) { %>
       <input type="hidden" name="playlistId" value="<%= playlistId %>">
     <% } %>
@@ -13,48 +13,52 @@
       name="q" 
       value="<%= typeof searchTerm !== 'undefined' ? searchTerm : '' %>" 
       placeholder="Search songs..."
+      class="search-input"
     >
-    <button type="submit">Search</button>
+    <button type="submit" class="search-button">Search</button>
   </form>
 
   <% if (typeof searchTerm !== 'undefined' && searchTerm !== '') { %>
-    <h2>Results for "<%= searchTerm %>"</h2>
+    <h2 class="results-title">Results for "<%= searchTerm %>"</h2>
     <% if (locals.playlistId) { %>
-      <p>Adding to playlist</p>
+      <p class="playlist-notice">Adding to playlist</p>
     <% } %>
-  <% } %>
 
-  <% if (typeof tracks !== 'undefined' && tracks.length > 0) { %>
-    <div>
-      <% tracks.forEach(track => { %>
-        <div>
-          <% if (track.image) { %>
-            <img src="<%= track.image %>" width="50" height="50">
-          <% } %>
-          
-          <div>
-            <h3><%= track.name %></h3>
-            <p><%= track.artists %></p>
-            <p><%= track.album %></p>
-            <p><%= track.duration %></p>
-          </div>
-
-          <form action="/spotify/import" method="POST">
-            <% if (locals.playlistId) { %>
-              <input type="hidden" name="playlistId" value="<%= playlistId %>">
+    <% if (typeof tracks !== 'undefined' && tracks.length > 0) { %>
+      <div class="tracks-container">
+        <% tracks.forEach(track => { %>
+          <div class="track-card">
+            <% if (track.image) { %>
+              <img src="<%= track.image %>" class="track-image">
             <% } %>
-            <input type="hidden" name="spotifyId" value="<%= track.id %>">
-            <button type="submit">Import</button>
-          </form>
+            
+            <div class="track-info">
+              <h3 class="track-name"><%= track.name %></h3>
+              <p class="track-artists"><%= track.artists %></p>
+              <p class="track-album"><%= track.album %></p>
+              <p class="track-duration"><%= track.duration %></p>
+            </div>
 
-          <a href="<%= track.spotifyLink %>" target="_blank">Open in Spotify</a>
-        </div>
-      <% }) %>
-    </div>
-  <% } else if (typeof searchTerm !== 'undefined' && searchTerm !== '') { %>
-    <p>No tracks found for "<%= searchTerm %>"</p>
+            <form class="import-form" action="/spotify/import" method="POST">
+              <% if (locals.playlistId) { %>
+                <input type="hidden" name="playlistId" value="<%= playlistId %>">
+              <% } %>
+              <input type="hidden" name="spotifyId" value="<%= track.id %>">
+              <button type="submit" class="import-button">Import</button>
+            </form>
+
+              <a href="<%= track.spotifyLink %>" target="_blank" class="spotify-link">
+                <i class="fab fa-spotify"></i>
+                <span class="sr-only">Open in Spotify</span>
+              </a>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="no-results">No tracks found for "<%= searchTerm %>"</p>
+    <% } %>
   <% } else { %>
-    <p>Enter a search term to find songs</p>
+    <p class="search-prompt">Enter a search term to find songs</p>
   <% } %>
 </div>
 

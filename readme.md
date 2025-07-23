@@ -32,6 +32,7 @@ A website where the user can create custom playlists.
 - Bcrypt
 - Express session
 - Cloudinary
+- Render
 
 ## 📚 Credits / References Used
 - [Color Pallet](https://colorhunt.co/palette/102e50f5c45ee78b48be3d2a)
@@ -40,4 +41,4 @@ A website where the user can create custom playlists.
 
 
 ## 🚧 Next Steps
-- xxx
+- Adding a music player.
