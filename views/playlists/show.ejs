@@ -3,7 +3,7 @@
 <main class="playlist-show">
   <div class="playlist-header">
     <% if (playlist.coverImage) { %>
-      <img src="<%= playlist.coverImage %>" alt="Cover image for <%= playlist.title %>" class="cover-image">
+      <img src="<%= playlist.coverImage.url %>" alt="Cover image for <%= playlist.title %>" class="cover-image">
     <% } else { %>
       <div class="cover-image placeholder">
         <span class="initial"><%= playlist.title.charAt(0) %></span>
