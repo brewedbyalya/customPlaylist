@@ -55,7 +55,7 @@
       <% playlists.forEach(playlist => { %>
         <a href="/playlists/<%= playlist._id %>" class="playlist-card">
           <% if (playlist.coverImage) { %>
-            <img src="<%= playlist.coverImage %>" alt="<%= playlist.title %> cover" class="playlist-cover">
+            <img src="<%= playlist.coverImage.url %>" alt="<%= playlist.title %> cover" class="playlist-cover">
           <% } else { %>
             <div class="playlist-cover placeholder">
               <span><%= playlist.title.charAt(0) %></span>
