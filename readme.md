@@ -1,13 +1,11 @@
 # Custom Playlist Creator (Melodrive)
 
-![Site Screenshot](./assets/screenshot.png)
-
 ## 🕹️ Description
 A website where the user can create custom playlists.
 
 ## 🚀 Getting Started
 
-👉 **Access it** [here!](site)
+👉 **Access it** [here!](https://customplaylist.onrender.com)
 
 👉 **Planning Materials:**
  [User Stories + Wireframe](https://trello.com/b/xmNPFLI4/custom-playlist-creator)
