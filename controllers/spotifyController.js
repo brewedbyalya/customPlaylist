@@ -42,7 +42,7 @@ router.get('/search', async (req, res) => {
 
     const user = await User.findById(req.session.user._id);
     if (!user || !user.spotifyAccessToken) {
-      return res.redirect('/settings');
+      return res.send('You are not connected to spotify.');
     }
 
     const searchTerm = req.query.q;
